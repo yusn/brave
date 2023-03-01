@@ -701,9 +701,9 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 
 		// 获取查询开始时间
 		$interval = get_array_key($comment_config_array, $check_key_word);
-		$comment_approved_time = get_brave_date_string('', $interval);
+		$comment_approved_time = get_brave_date_string('now', $interval);
 
-		// 区别: comment_date 当日时间, comment_date_gmt 格林尼治时间
+		// 区别: comment_date 系统设置的时区时间, comment_date_gmt 格林尼治时间
 		global $wpdb;
 		$comments = $wpdb->get_row($wpdb->prepare("SELECT count(1) as ttl_comment FROM $wpdb->comments WHERE comment_approved in ($comment_status) and comment_date >= %s and comment_author_IP = %s", $comment_approved_time, $comment_IP));
 
@@ -718,12 +718,11 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
  * $interval String 默认实时
  * $date_format String 时间格式 默认 Y-m-d H:i:s
  * $timezone String 时区标识符, 如 UTC
- * $format String 返回格式
  * @return String
  */
-function get_brave_date_string($start_date = '', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = 'PRC', $format = 'string') {
-	date_default_timezone_set($timezone);
-	$start_date = strlen($start_date) ? date_create($start_date) : date_create();
+function get_brave_date_string($start_date = 'now', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = NULL) {
+	$timezone = $timezone ? $timezone : get_brave_basic_config('time_zone');
+	$start_date = date_create($start_date, $timezone);
 	return date_format(date_add($start_date, date_interval_create_from_date_string($interval)), $date_format);
 }
 
@@ -901,24 +900,12 @@ if (!is_user_logged_in()) {
 
 	/*
 		添加统计代码, 不统计登录用户
-	*/
+	
 	function add_brave_analytics() {
-		?>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-6512951-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-
-            gtag('js', new Date());
-            gtag('config', 'UA-6512951-1');
-        </script>
-		<?php
+		
 	}
-
 	add_action('wp_footer', 'add_brave_analytics');
+	*/
 }
 
 // 设置发布日志者的设备信息
