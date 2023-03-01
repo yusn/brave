@@ -645,8 +645,6 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 	}
 }
 
-date_default_timezone_set('PRC'); // 启用中国时区
-
 /**
  * 获取评论信息
  * $check_key_word String
@@ -705,6 +703,7 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 		$interval = get_array_key($comment_config_array, $check_key_word);
 		$comment_approved_time = get_brave_date_string('', $interval);
 
+		// 区别: comment_date 当日时间, comment_date_gmt 格林尼治时间
 		global $wpdb;
 		$comments = $wpdb->get_row($wpdb->prepare("SELECT count(1) as ttl_comment FROM $wpdb->comments WHERE comment_approved in ($comment_status) and comment_date >= %s and comment_author_IP = %s", $comment_approved_time, $comment_IP));
 
