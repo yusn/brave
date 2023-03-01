@@ -21,3 +21,9 @@ node_modules/
 *.log
 *.sql
 *.sqlite
+
+# 忽略 conf 目录
+conf/
+
+# 忽略文件
+page-*.php

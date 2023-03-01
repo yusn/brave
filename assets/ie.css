@@ -1,0 +1,30 @@
+/* CSSTidy 1.5.2: Wed, 26 Jul 2017 16:44:57 -0500 */
+#header{height:60px}
+#menubar{display:block!important}
+.nav-menu,.i-search::before{line-height:60px}
+.menu{padding:0 0 0 90px}
+.headerin,.footerin{width:980px}
+.mt{margin-top:60px}
+.s-text{height:36px;margin:12px 0;transition:all .2s ease-in-out 0;background:#f6f6f6}
+.s-text:focus{background:#fff}
+.lark,.inner,.egret,.archive-list{width:740px}
+.egret,.lark,.owl,.leo{padding-top:60px}
+.egret,.lark,.owl,.leo,.archive-list,.bp{margin-left:auto;margin-right:auto}
+.type-page,.little_star{width:640px}
+.fat{padding:12px}
+.fu{padding:220px 0}
+.video-header{height:520px}
+.sv-inner{padding:200px 0}
+.owl,.leo,.bp{width:800px}
+.bp h1,.bp h2,.bp h3,.bp h4,.bp h5,.bp h6,.bp ol,.bp ul,.bp p,.bp blockquote,.bp pre,.fat-meta,.bp .wp-caption-text{margin-left:80px;margin-right:80px}
+.bp li p,.bp li h3,.bp li h4,.bp li h5,.bp li pre,.bp li blockquote,.bp blockquote p,.bp pre p{margin-left:0;margin-right:0}
+.wp-caption p{padding:0}
+.f-items{float:right}
+.f-items,.single-format-standard .wp-caption-text{text-align:right}
+.vicuna{margin-left:-30px;margin-right:-30px}
+.single-format-standard .wp-caption-text{position:absolute;left:-220px;top:4px;width:200px;padding:5px;margin:0}
+.cmt-input{width:280px}
+.avatar{border-radius:6px}
+.must-log-in{margin:18px 0}
+.animation{width:43px;height:11px;background-image:url(data:image/gif;base64,R0lGODlhKwALAPEAAP///6qqqtTU1KqqqiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAKwALAAACMoSOCMuW2diD88UKG95W88uF4DaGWFmhZid93pq+pwxnLUnXh8ou+sSz+T64oCAyTBUAACH5BAkKAAAALAAAAAArAAsAAAI9xI4IyyAPYWOxmoTHrHzzmGHe94xkmJifyqFKQ0pwLLgHa82xrekkDrIBZRQab1jyfY7KTtPimixiUsevAAAh+QQJCgAAACwAAAAAKwALAAACPYSOCMswD2FjqZpqW9xv4g8KE7d54XmMpNSgqLoOpgvC60xjNonnyc7p+VKamKw1zDCMR8rp8pksYlKorgAAIfkECQoAAAAsAAAAACsACwAAAkCEjgjLltnYmJS6Bxt+sfq5ZUyoNJ9HHlEqdCfFrqn7DrE2m7Wdj/2y45FkQ13t5itKdshFExC8YCLOEBX6AhQAADsAAAAAAAAAAAA=)}
+
