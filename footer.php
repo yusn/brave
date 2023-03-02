@@ -14,7 +14,7 @@
 			<?php endif; ?>
 		</div>
 		<div class="f-items mt5">&copy;<?php echo date("Y"); ?> <?php echo get_bloginfo('name'); ?> Some Rights Reserved
-			<div class="mt5"><a href="https://muguayuan.com/2016/3156.html" class="mr">Brave</a><a href="https://beian.miit.gov.cn"><?php echo get_brave_basic_config('beian'); ?></a></div>
+			<div class="mt5"><a href="//github.com/yusn/Brave" class="mr">Brave</a><a href="https://beian.miit.gov.cn"><?php echo get_brave_basic_config('beian'); ?></a></div>
         </div><!-- .f-items -->
 	</div><!-- .footerin -->
 </footer><!-- #footer -->
