@@ -8,7 +8,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="<?php echo get_bloginfo('name'); ?>">
-<?php $asset_uri = get_brave_basic_config('asset_uri'); ?>
+<?php 
+	$basic_config_array = get_brave_config('basic');
+	$asset_uri = get_array_key($basic_config_array, 'asset_uri');
+	$site_name = get_array_key($basic_config_array, 'site_name');
+	$home_url = get_array_key($basic_config_array, 'home_url');
+	$logo = get_array_key($basic_config_array, 'logo');
+?>
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <title><?php wp_title( '-', true, 'right' ); ?></title>
@@ -99,18 +105,15 @@ if ( is_singular() && pings_open() ) {
 	<div class="headerin">
 		<div class="site-title frog" itemscope itemtype="//schema.org/WPHeader">
 			<?php
-					$site_name = get_bloginfo('name');
-					$home_url = get_brave_basic_config('home_url');
-					if (is_front_page() && is_home()) {
-						$element = 'h1';
-					} else {
-						$element = 'span';
-					}
-					echo '<a href="' . $home_url . '"><' . $element . ' class="site-name" title="' . $site_name . '">' . $site_name . '</' . $element . '></a>';
-				?>
+				if (is_front_page() && is_home()) {
+					$element = 'h1';
+				} else {
+					$element = 'span';
+				}
+				echo '<a href="' . $home_url . '"><' . $element . ' class="site-name" title="' . $site_name . '">' . $site_name . '</' . $element . '></a>';
+			?>
 			<div id="menu-toggle"><span id="toggle" class="i-menu touch-easy"></span></div>
 			<?php 
-				$logo = get_brave_basic_config('logo');
 				if (!empty($logo)) :
 			?>
 				<a id="site-logo" href="/" title="<?php echo $site_name; ?>">

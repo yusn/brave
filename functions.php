@@ -55,7 +55,6 @@ add_filter('big_image_size_threshold', '__return_false');
 add_filter('wp_calculate_image_srcset_meta', '__return_null');
 
 // 加载配置项
-include_once(get_template_directory() . '/conf/config.php');
 include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
 
 // Disable_image_sizes
@@ -77,28 +76,30 @@ function disable_image_sizes($brave_img_sizes) {
  * @return json
  *
  * 通过 admin-ajax.php 调用的请求示例:
- * 请求参数: action=get_brave_config&group=basic&item=asset_uri
- * 函数解析: 本请求最后会被组成函数调用 get_brave_basic_config('asset_uri');
+ * 请求参数: action=get_brave_config_intf&group=basic&item=asset_uri
+ * 函数解析: 本请求最后会被组成函数调用 get_brave_config('basic', 'asset_uri');
 **/
-add_action('wp_ajax_nopriv_get_brave_config', 'get_brave_config');
-add_action('wp_ajax_get_brave_config', 'get_brave_config');
-function get_brave_config() {
+add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
+add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
+function get_brave_config_intf() {
 	$group = sanitize_text_field($_REQUEST['group']);
 	$item = sanitize_text_field($_REQUEST['item']);
 	$response = [];
 	// 暂时只响应 asset_uri
-	if (!isset($group) || !isset($item) || $item !== 'asset_uri') {
+	if (!isset($group) || !isset($item) || $group !== 'basic' || $item !== 'asset_uri') {
 		exit();
 	}
-	$func = 'get_brave_' . $group . '_config';
-	$response[$item] = $func($item);
-	wp_send_json($response);
+	$func = 'get_brave_config';
+	if (function_exists($func)) {
+		$response[$item] = $func($group, $item);
+		wp_send_json($response);
+	}
 }
 
 // 脚本配置
 function brave_scripts_styles() {
 	global $wp_styles;
-	$asset_uri = get_brave_basic_config('asset_uri');
+	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
 		wp_enqueue_script('family', $asset_uri . '/family.min.js');
@@ -129,7 +130,7 @@ function brave_setup() {
 	add_editor_style();
 	add_theme_support('title-tag');
 	add_theme_support('automatic-feed-links');
-	add_theme_support('post-formats', get_brave_basic_config('enable_post_format'));
+	add_theme_support('post-formats', get_brave_config('basic', 'enable_post_format'));
 	register_nav_menu('primary', __('Primary Menu', 'brave'));
 	add_theme_support('post-thumbnails');
 	add_image_size('large', 1200, '', true);
@@ -168,7 +169,7 @@ function exclude_brave_post_from_query($query) {
 			array(
 				'taxonomy' => 'post_format',
 				'field' => 'slug',
-				'terms' => get_brave_query_config('home.terms_not_in'),
+				'terms' => get_brave_config('query', 'home.terms_not_in'),
 				'operator' => 'NOT IN',
 			)
 		);
@@ -181,7 +182,7 @@ function exclude_brave_post_from_query($query) {
 			array(
 				'taxonomy' => 'post_format',
 				'field' => 'slug',
-				'terms' => get_brave_query_config('feed.terms_not_in'),
+				'terms' => get_brave_config('query', 'feed.terms_not_in'),
 				'operator' => 'NOT IN'
 			)
 		);
@@ -232,7 +233,7 @@ add_filter('wp_title', 'format_brave_title', 10, 2);
 
 // Rename post format
 function rename_brave_post_formats($translation, $text, $context, $domain) {
-	$format_name = get_brave_basic_config('post_format_name');
+	$format_name = get_brave_config('basic', 'post_format_name');
 	if ($context == 'Post format') {
 		$translation = str_replace(array_keys($format_name), array_values($format_name), $text);
 	}
@@ -272,7 +273,7 @@ function get_brave_post_thumbnail() {
 }
 
 function set_brave_excerpt_length($length) {
-	return get_brave_basic_config('excerpt_length');
+	return get_brave_config('basic', 'excerpt_length');
 }
 
 add_filter('excerpt_length', 'set_brave_excerpt_length', 999);
@@ -367,19 +368,21 @@ function get_brave_year_of_age($birth_date) {
 }
 
 function get_brave_age() {
-	$key = get_brave_custom_config('date');
+	$format = get_post_format();
+	$key = get_brave_config('custom', 'date.' . $format);
 	$date = date_create($key); // 转换成日期格式
 	return isset($key) ? get_brave_year_of_age($date) : '';
 }
 
 function get_brave_role() {
-	return printf(get_brave_custom_config('role'));
+	$format = get_post_format();
+	return printf(get_brave_config('custom', 'role.' . $format));
 }
 
 // 展示广告
 function display_brave_ad($type) {
 	// 管理员不看广告, 不开启不显示广告
-	if (current_user_can('administrator') || !get_brave_basic_config('display_ad')) {
+	if (current_user_can('administrator') || !get_brave_config('basic', 'display_ad')) {
 		return;
 	}
 	// 拼接成函数名
@@ -391,8 +394,8 @@ function display_brave_ad($type) {
 
 // 搜索页面的日期显示格式
 function get_brave_search_date() {
-	$role = get_brave_custom_config('role');
-	if ($role) {
+	$role = get_brave_config('custom', 'role');
+	if (!empty($role)) {
 		return get_brave_age();
 	} else {
 		return the_time(__('Y-m-d', 'brave'));
@@ -490,6 +493,7 @@ function get_brave_post_device() {
 			*/
 			default:
 				$html_string = '<span class="ml">' . $post_device . '</span>';
+				break;
 		}
 		echo $html_string;
 	}
@@ -548,20 +552,19 @@ function modify_brave_comment_class($class) {
 	}
 
 	// Remove class from comment_class
-	$array_to_remove = [];
 	foreach ($class as $key => $val) {
 		if (strpos($val, 'comment-author-') !== false || strpos($val, 'by') !== false) {
-			$array_to_remove[] = $val;
+			remove_array_key($class, $key);
 		}
 	}
-	return array_diff($class, $array_to_remove);
+	return $class;
 }
 
 add_filter('comment_class', 'modify_brave_comment_class');
 
 // Customize comment
 function brave_comment($comment, $args, $depth) {
-	$GLOBALS['comment'] = $comment;
+	global $comment;
 	switch ($comment->comment_type) {
 		case 'pingback' :
 		case 'trackback' :
@@ -611,7 +614,7 @@ function brave_comment($comment, $args, $depth) {
  */
 function check_brave_comment($check_key_word, $check_key_word_value) {
 	// 评论控制阈值参数数组
-	$thresholdArray = get_brave_comment_config('threshold');
+	$thresholdArray = get_brave_config('comment', 'threshold');
 
 	/* case 1: 判断是否有垃圾评论: 评论对象存在一条垃圾评论或被移动回收站的评论即不允许继续提交评论 */
 	$comment_status = 'spam';
@@ -653,6 +656,10 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
  * @return int
  */
 function get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value) {
+	
+	// 获取评论配置
+	$comment_config_array = get_brave_config('comment');
+	
 	// 根据 email 查询是否有异常评论
 	if ($check_key_word === 'email') {
 		$comment_email = $check_key_word_value;
@@ -668,7 +675,7 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 		} else if (in_array('approve', $comment_status_array)) {
 			$config_key = 'email.approve';
 		}
-		$after_date = get_brave_comment_config($config_key);
+		$after_date = get_array_key($comment_config_array, $config_key);
 		$date_query_array = array();
 		if (!!$after_date) {
 			$date_query_array = array(
@@ -685,7 +692,6 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 
 	// 根据 IP 查询是否有异常评论
 	if ($check_key_word === 'IP') {
-		$comment_config_array = get_brave_comment_config();
 		$comment_IP = $check_key_word_value;
 		/* 置换 $comment_status_array 为 sql 条件 开始 */
 		$status_convert_array = get_array_key($comment_config_array, 'comment_status_convert_array');
@@ -717,11 +723,11 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
  * $start_date String 开始日期,
  * $interval String 默认实时
  * $date_format String 时间格式 默认 Y-m-d H:i:s
- * $timezone String 时区标识符, 如 UTC
+ * $timezone timezone 时区类型
  * @return String
  */
 function get_brave_date_string($start_date = 'now', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = NULL) {
-	$timezone = $timezone ? $timezone : get_brave_basic_config('time_zone');
+	$timezone = $timezone ? $timezone : get_brave_config('basic', 'time_zone');
 	$start_date = date_create($start_date, $timezone);
 	return date_format(date_add($start_date, date_interval_create_from_date_string($interval)), $date_format);
 }
@@ -756,43 +762,66 @@ function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
 	return substr(str_shuffle($hash_mask), -$hash_length);
 }
 
-// 开启 session
-//session_start();
+/* 
+ * 获取散列值
+ * $group string
+ * $item string
+ * $user_hash string
+ * @return boolean 校验通过返回 true;否则,返回 false
+*/
+function get_brave_secure_auth($group, $item) {
+	return wp_hash( get_brave_config($group, $item) );
+
+}
+
+/* 
+ * 校验散列值
+ * $group string
+ * $item string
+ * $user_hash string
+ * @return boolean 校验通过返回 true;否则,返回 false
+*/
+function check_brave_secure_auth($sys_hash, $user_hash) {
+	return hash_equals($sys_hash, $user_hash);
+}
 
 // 生成评论框名称
-function get_comment_text_field() {
-	$comment_text_field = get_brave_comment_config('comment_text_field');
-	/*
-	$comment_text_name_hash = get_array_key('_SESSION', $comment_text_field);
-	if (isset($comment_text_name_hash)) {
-		// $_SESSION 存在时直接返回 $_SESSION 中存储的值
-		return $comment_text_name_hash;
-	}
-	$sep = '_';
-	$hash_length = 8; // 8位长度
-	$prefix = get_brave_hash(6, 'LlIiTtTtLlEe') . $sep . get_brave_hash(4, 'SsTtAaRrTt');
-	$comment_text_name_hash = $prefix . $sep . get_brave_hash($hash_length);
-	// 加入 session
-	$_SESSION[$comment_text_field] = $comment_text_name_hash;
-	return $comment_text_name_hash;
-	*/
-	return !empty($comment_text_field) && is_string($comment_text_field) ? $comment_text_field : 'brave_comment';
+function get_brave_comment_text_field() {
+	$comment_text_field = get_brave_config('comment', 'comment_text_field');
+	return (!empty($comment_text_field) && is_string($comment_text_field)) ? $comment_text_field : 'brave_comment';
 }
 
 /**
  * 获取数组键值
- * $array string|array string将被转换为同名的超全局变量
+ * $array array
  * $key string
  * @return
- * 支持传入超全局变量 https://www.php.net/manual/zh/language.variables.superglobals.php#124171
+ * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
  */
-function get_array_key($array, $key) {
-	if (is_string($array)) {
-		global $$array;
-		return array_key_exists($key, $$array) ? $$array[$key] : null;
-	} elseif (is_array($array)) {
-		return array_key_exists($key, $array) ? $array[$key] : null;
+function get_array_key(&$array, $key) {
+	return array_key_exists($key, $array) ? $array[$key] : null;
+}
+
+/**
+ * 移除数组键值
+ * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
+ * $key string
+ * @return
+ */
+function remove_array_key(&$array, $key) {
+	if (array_key_exists($key, $array)) {
+		unset($array[$key]);
 	}
+}
+
+/**
+ * 设置数组键值
+ * $array array
+ * $key string
+ * @return
+ */
+function set_array_key(&$array, $key) {
+	$array[$key] = $val;
 }
 
 // 阻止浏览器缓存
@@ -802,7 +831,7 @@ function clear_brave_cache() {
 
 // 发送邮件
 function send_brave_mail($subject, $body) {
-	$to = get_brave_basic_config('mail.to');
+	$to = get_brave_config('basic', 'mail.to');
 	$headers = array('Content-Type:text/html;charset=UTF-8');
 	wp_mail($to, $subject, $body, $headers);
 }
@@ -856,8 +885,8 @@ add_filter('the_title_rss', 'add_brave_post_format_to_title_rss');
 
 // 获取错误信息
 function get_brave_error_msg($error_name, $title = NULL) {
-	$error_key = get_brave_error_config('code.' . $error_name);
-	$error_val = '<strong>错误：</strong>' . get_brave_error_config('msg.' . $error_key);
+	$error_key = get_brave_config('error', 'code.' . $error_name);
+	$error_val = '<strong>错误：</strong>' . get_brave_config('error', 'msg.' . $error_key);
 	return get_brave_die($error_key, $error_val, $title);
 }
 
@@ -879,12 +908,18 @@ if (!is_user_logged_in()) {
 	// 非登陆用户评论预处理
 	function preprocess_brave_comment($commentdata) {
 		// 防止直接走 wp-comments-post.php
-		$check_comment = get_brave_comment_config('check');
+		$check_comment = get_brave_config('comment', 'check');
 		if ($check_comment) {
-			$comment_channel_field = get_brave_comment_config('comment_channel_field');
-			$has_comment_channel = get_array_key('_POST', $comment_channel_field);
-			if (empty($has_comment_channel)) {
-				return get_brave_error_msg('channel_error_pc'); // 评论来源异常
+			$comment_channel_field = get_brave_config('comment', 'comment_channel_field');
+			$comment_channel_val = trim(get_array_key($_POST, $comment_channel_field));
+			if (empty($comment_channel_val)) {
+				return get_brave_error_msg('channel_error_hash_empty'); // 评论来源异常
+			}
+			// 散列校验
+			$sys_hash = get_brave_secure_auth('comment', 'comment_check_key');
+			$is_pass = check_brave_secure_auth($sys_hash, $comment_channel_val);
+			if (!$is_pass) {
+				return get_brave_error_msg('hash_check_fail'); // 评论来源异常
 			}
 		}
 
@@ -1038,11 +1073,13 @@ add_action('wp_insert_comment', 'set_brave_comment_device_meta', 10, 2);
  * $commentdata array
  */
 function modify_brave_comment_approved($approved, $commentdata) {
+	/* 不需要这些判断
 	$key = 'comment_author_' . $check_key_word;
 	if (get_array_key($commentdata, $key) === $check_key_word_value) {
 		$approved = 0;
 	}
-	return $approved;
+	*/
+	return $approved = 0;
 }
 
 /*	
@@ -1051,9 +1088,9 @@ function modify_brave_comment_approved($approved, $commentdata) {
  * add_filter 中的第4个参数用于指定给 auto_brave_private_post_format 函数传几个参数
 */
 function auto_private_brave_post_format($data, $postarr) {
-	$brave_post_format = get_post_format($postarr['ID']);
-	$private_format_array = get_brave_custom_config('auto_private_post_format', false);
-	if (in_array($brave_post_format, $private_format_array) && $data['post_status'] === 'publish') {
+	$format = get_post_format($postarr['ID']);
+	$private_format_array = get_brave_config('custom', 'auto_private_post_format');
+	if (in_array($format, $private_format_array) && $data['post_status'] === 'publish') {
 		$data['post_status'] = 'private';
 	}
 	return $data;
@@ -1068,7 +1105,7 @@ add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 10, 2);
  */
 function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL) {
 	$key = $check_type . '_' . $comment_status;
-	$error_key = get_brave_error_config('code.' . $key);
+	$error_key = get_brave_config('error', 'code.' . $key);
 	switch ($comment_status) {
 		case 'spam': // 垃圾评论错误提示
 			$error_val = '系统检测到你可能有异常评论，我们不允许你继续提交评论！';
@@ -1094,5 +1131,45 @@ function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL
 include_once(get_template_directory() . '/plugin/like.php');
 // 加载广告配置
 include_once(get_template_directory() . '/plugin/display_ad.php');
+
+function get_brave_config($group, $item = NULL) {
+	static $conf_obj, $cached_result = array();
+	
+	// step1. 有缓存的直接取缓存
+	if (isset($cached_result[$group])) {
+		return empty($item) ? $cached_result[$group] : $cached_result[$group][$item];
+	}
+	
+	// step2. 没有缓存的重新取
+	if (!isset($conf_obj)) {
+		include_once(get_template_directory() . '/conf/config.php');
+		$conf_obj = new Config();
+	}
+	/* 获取闭包函数 
+	 * 闭包函数返回 group键对应的元素
+	*/
+	$func = $conf_obj->get_config($group);
+	$group_array = $func();
+	
+	// 缓存 group
+	$cached_result[$group] = $group_array;
+	
+	// 不传 $item 或 传入空值, 返回整个 $group
+	if (empty($item)) {
+		return $group_array;
+	}
+	
+	// 拆分 $item 并返回最底层的数组元素
+	$item_array = explode('.', $item);
+	$count_item = count($item_array);
+	if ($count_item > 3) {
+		$count_item = 3;
+	}
+	for ($i = 0; $i < $count_item; $i++) {
+		$group_array = get_array_key($group_array, get_array_key($item_array, $i));
+	}
+	$result = $group_array;
+	return $result;
+}
 
 ?>

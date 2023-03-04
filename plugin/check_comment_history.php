@@ -8,7 +8,7 @@ if (current_user_can('administrator')) {
 	return;
 }
 
-$comment_email = trim(get_array_key('_POST', 'email'));
+$comment_email = trim(get_array_key($_POST, 'email'));
 
 // 校验 email 合法性
 if (!is_email($comment_email)) {

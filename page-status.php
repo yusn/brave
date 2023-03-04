@@ -19,7 +19,7 @@ get_header(); ?>
 				array(
 					'taxonomy' => 'post_format',
 					'field'    => 'slug',
-                    'terms'    => get_brave_query_config('Here.terms_in'),
+                    'terms'    => get_brave_config('query', 'Here.terms_in'),
 				)
 			),
 	);
