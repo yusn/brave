@@ -99,7 +99,7 @@ function loadPrism(itemArr) {
                 Prism.highlightAllUnder(el);
             } else {
                 var group = 'basic', item = 'asset_uri',
-                    reqStr = 'action=get_brave_config&group=' + group + '&item=' + item;
+                    reqStr = 'action=get_brave_config_intf&group=' + group + '&item=' + item;
                 callXHR(reqStr, prismCb);
 				
                 function prismCb(_self) {

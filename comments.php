@@ -8,8 +8,8 @@ if ( post_password_required() ) {
 	<?php
 		$commenter = wp_get_current_commenter();
 		$consent = empty(get_array_key($commenter, 'comment_author_email')) ? '' : ' checked="checked"';
-		$comment_text_field = get_comment_text_field();
-		$form_action_dir = get_brave_comment_config('form_action_dir');
+		$comment_text_field = get_brave_comment_text_field();
+		$form_action_dir = get_brave_config('comment', 'form_action_dir');
 		$comment_action = $form_action_dir ? $form_action_dir. '/wp-stop-spam.php' : '/wp-comments-post.php';
 		$comment_form_array = array(
 			'fields'  => array(

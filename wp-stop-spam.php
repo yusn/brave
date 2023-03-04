@@ -36,28 +36,29 @@ require_once(__ROOT__ . '/wp-load.php');
 
 // 检查是否开启评论控制
 $is_check = false;
-if (function_exists('get_brave_comment_config')) {
-	$is_check = get_brave_comment_config('check');
+if (function_exists('get_brave_config')) {
+	$brave_config_array = get_brave_config('comment');
+	$is_check = $brave_config_array['check'];
 }
 
 if ($is_check) {
 	
-	// 先清缓存
+	/* --千里之行, 始于足下-- */
+	
+	// step.0: 清缓存
 	nocache_headers();
 	
-	$error_title = 'Comment Submission Failure';
-	
 	// step.1: 默认评论字段必须为空, 且不能存在 comment_channel
-	$comment = trim(get_array_key('_POST', 'comment'));
-	$comment_channel_field = get_brave_comment_config('comment_channel_field');
+	$comment = trim(get_array_key($_POST, 'comment'));
+	$comment_channel_field = $brave_config_array['comment_channel_field'];
 	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
 	if (!empty($comment) || $has_comment_channel) {
 		return get_brave_error_msg('channel_error_wss'); // 评论来源异常
 	}
 	
 	// step.2: 自定义评论框必须不能为空
-	$comment_text_field = get_comment_text_field();
-	$real_comment = trim(get_array_key('_POST', $comment_text_field));
+	$comment_text_field = get_brave_comment_text_field();
+	$real_comment = trim(get_array_key($_POST, $comment_text_field));
 	if (empty($real_comment)) {
 		return get_brave_error_msg('empty_comment'); // 评论内容为空
 	}
@@ -67,6 +68,7 @@ if ($is_check) {
 	 * 来自 wp-comments-post.php
 	*/
 	$error_obj = wp_handle_comment_submission( wp_unslash( $_POST ) );
+	$error_title = 'Comment Submission Failure';
 	if ( is_wp_error( $error_obj ) ) {
 		$code = $error_obj->get_error_code();
 		if ( $code !== 'require_valid_comment' ) {
@@ -83,7 +85,7 @@ if ($is_check) {
 	$_POST['comment'] = $real_comment;
 	
 	// step.6: 添加来源 防止直接走 wp-comments-post.php
-	$_POST[$comment_channel_field] = $comment_text_field;
+	$_POST[$comment_channel_field] = get_brave_secure_auth('comment', 'comment_check_key');
 	
 	// step.7: 最后, 交给系统处理
 	require_once(__ROOT__ . '/wp-comments-post.php');

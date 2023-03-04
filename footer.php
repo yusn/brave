@@ -3,7 +3,9 @@
 	<div class="footerin clear">
 		<div class="f-name">
 			<?php 
-				$logo = get_brave_basic_config('logo');
+				$basic_config_array = get_brave_config('basic');
+				$logo = $basic_config_array['logo'];
+				$beian = $basic_config_array['beian'];
 				if (!empty($logo)) :
 			?>
 				<a id="logo" href="/" title="<?php get_bloginfo('name'); ?>">
@@ -14,7 +16,7 @@
 			<?php endif; ?>
 		</div>
 		<div class="f-items mt5">&copy;<?php echo date("Y"); ?> <?php echo get_bloginfo('name'); ?> Some Rights Reserved
-			<div class="mt5"><a href="https://muguayuan.com/2016/3156.html" class="mr">Brave</a><a href="https://beian.miit.gov.cn"><?php echo get_brave_basic_config('beian'); ?></a></div>
+			<div class="mt5"><a href="//github.com/yusn/Brave" class="mr">Brave</a><a href="https://beian.miit.gov.cn"><?php echo $beian; ?></a></div>
         </div><!-- .f-items -->
 	</div><!-- .footerin -->
 </footer><!-- #footer -->
