@@ -794,19 +794,42 @@ function get_brave_comment_text_field() {
 /**
  * 获取数组键值
  * $array array
- * $key string
+ * $key string | Int 数组键 或 数组索引。 支持多级键, 以.号分隔, 示例: get_array_key(array, 'key1.key2');
  * @return
- * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
  */
-function get_array_key(&$array, $key) {
-	return array_key_exists($key, $array) ? $array[$key] : null;
+function get_array_key($array, $key) {
+	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
+		return NULL;
+	}
+	
+	// 传入的是索引
+	if (is_int($key)) {
+		return array_key_exists($key, $array) ? $array[$key] : NULL;
+	}
+	
+	// 传入的是键
+	$item_array = explode('.', $key);
+	$count_item = count($item_array);
+	for ($i = 0; $i < $count_item; $i++) {
+		$key = $item_array[$i];
+		if (is_array($array)) {
+			// 获取下一层
+			$array = $array[$key];
+		} else {
+			// 非数组无法获取下一层
+			$array = NULL;
+			break;
+		}
+	}
+	$result = $array;
+	return $result;
 }
-
 /**
  * 移除数组键值
  * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
  * $key string
  * @return
+ * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
  */
 function remove_array_key(&$array, $key) {
 	if (array_key_exists($key, $array)) {
@@ -1136,7 +1159,7 @@ function get_brave_config($group, $item = NULL) {
 	
 	// step1. 有缓存的直接取缓存
 	if (isset($cached_result[$group])) {
-		return empty($item) ? $cached_result[$group] : $cached_result[$group][$item];
+		return empty($item) ? $cached_result[$group] : get_array_key($cached_result[$group], $item);
 	}
 	
 	// step2. 没有缓存的重新取
@@ -1145,30 +1168,20 @@ function get_brave_config($group, $item = NULL) {
 		$conf_obj = new Config();
 	}
 	/* 获取闭包函数 
-	 * 闭包函数返回 group键对应的元素
+	 * 闭包函数返回 $group 键对应的元素
 	*/
 	$func = $conf_obj->get_config($group);
 	$group_array = $func();
 	
-	// 缓存 group
+	// 缓存 $group
 	$cached_result[$group] = $group_array;
 	
 	// 不传 $item 或 传入空值, 返回整个 $group
 	if (empty($item)) {
 		return $group_array;
 	}
-	
-	// 拆分 $item 并返回最底层的数组元素
-	$item_array = explode('.', $item);
-	$count_item = count($item_array);
-	if ($count_item > 3) {
-		$count_item = 3;
-	}
-	for ($i = 0; $i < $count_item; $i++) {
-		$group_array = get_array_key($group_array, get_array_key($item_array, $i));
-	}
-	$result = $group_array;
-	return $result;
+	// 传 $item, 返回 $item 路径下的值
+	return get_array_key($group_array, $item);
 }
 
 ?>
