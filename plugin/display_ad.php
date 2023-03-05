@@ -25,4 +25,10 @@ function ad_c() {
 	<?php
 }
 
+function google_analytics() {
+    ?>
+    <!-- 统计代码 -->
+    <?php  
+}
+
 ?>

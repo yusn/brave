@@ -99,13 +99,15 @@ function get_brave_info($key) {
 			'code' => array(
 				'email_spam' => '1001',
 				'email_hold' => '1002',
-				'IP_spam' => '1003',
-				'IP_hold' => '1004',
-				'impostor' => '1005',
-				'channel_error' => '1006',
-				'trackback_disabled' => '1007',
-				'empty_comment' => '1008',
-				'channel_error_wss' => '1009',
+				'IP_spam'    => '1003',
+				'IP_hold'    => '1004',
+				'impostor'   => '1005',
+				'channel_error_hash_empty' => '1006',
+				'trackback_disabled'       => '1007',
+				'empty_comment'            => '1008',
+				'channel_error'            => '1009',
+				'channel_hash_check_fail'  => '1010',
+				'channel_error_fake_chnl'  => '1011',
 			),
 			// 错误详情
 			'msg' => array(
@@ -118,12 +120,15 @@ function get_brave_info($key) {
 				'1007' => '不接受 Trackback。',
 				'1008' => '请输入您的评论内容。',
 				'1009' => '未启用的评论来源。',
+				'1010' => '未启用的评论来源。',
+				'1011' => '伪造评论来源。',
 			),
 		),
 
 		// 评论控制参数 评论对象, 指依据评论者的 email 和 IP 确定的评论发起人, 下称评论对象或该对象
 		'comment' => array(
 			'check' => true, // boolean 是否启用评论控制
+			'comment_check_key' => 'BRAVE', // string 用于校验评论来源是否合法的(可自定义, 生成md5 hash 使用)
 			'form_action_dir' => home_url(''), // 评论处理文件所在的目录
 			'comment_channel_field' => 'comment_channel', // 用于标记评论来源的字段, 这个字段对用户是透明的, 防止直接走 wp-comments-post.php
 			'IP' => '1 day ago', // 根据 IP 控制异常评论的开始时间范围: 自当前时间按此值倒退(-1 day 等同于 1 day ago)

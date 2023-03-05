@@ -53,8 +53,12 @@ if ($is_check) {
 	$comment_channel_field = $brave_config_array['comment_channel_field'];
 	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
 	if (!empty($comment) || $has_comment_channel) {
-		return get_brave_error_msg('channel_error_wss'); // 评论来源异常
+		return get_brave_error_msg('channel_error'); // 评论来源异常
 	}
+	if ($has_comment_channel) {
+		return get_brave_error_msg('channel_error_fake_chnl'); // 试图伪造评论来源标记
+	}
+	
 	
 	// step.2: 自定义评论框必须不能为空
 	$comment_text_field = get_brave_comment_text_field();
