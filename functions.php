@@ -821,9 +821,9 @@ function get_array_key($array, $key) {
 			break;
 		}
 	}
-	$result = $array;
-	return $result;
+	return $array;
 }
+
 /**
  * 移除数组键值
  * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
