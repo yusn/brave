@@ -406,7 +406,7 @@ function get_brave_search_date() {
 function add_brave_mobile_class($class) {
 	$detect = new Mobile_Detect;
 	if ($detect->isMobile()) {
-		$class[] = 'mob';
+		set_array_key($class, '', 'mob');
 	}
 	return $class;
 }
@@ -548,7 +548,7 @@ function modify_brave_comment_class($class) {
 	// Add class to parent comment, for Infinite Ajax Scroll
 	$current_comment = get_comment();
 	if (empty($current_comment->comment_parent)) {
-		$class[] = 'item';
+		set_array_key($class, '', 'item');
 	}
 
 	// Remove class from comment_class
@@ -820,7 +820,7 @@ function remove_array_key(&$array, $key) {
  * $key string
  * @return
  */
-function set_array_key(&$array, $key) {
+function set_array_key(&$array, $key, $val) {
 	$array[$key] = $val;
 }
 
