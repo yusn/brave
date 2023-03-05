@@ -1176,12 +1176,8 @@ function get_brave_config($group, $item = NULL) {
 	// 缓存 $group
 	$cached_result[$group] = $group_array;
 	
-	// 不传 $item 或 传入空值, 返回整个 $group
-	if (empty($item)) {
-		return $group_array;
-	}
-	// 传 $item, 返回 $item 路径下的值
-	return get_array_key($group_array, $item);
+	// 不传 $item 或 传入空值, 返回整个 $group; 传 $item, 返回 $item 路径下的值
+	return empty($item) ? $group_array : get_array_key($group_array, $item);
 }
 
 ?>
