@@ -919,7 +919,7 @@ if (!is_user_logged_in()) {
 			$sys_hash = get_brave_secure_auth('comment', 'comment_check_key');
 			$is_pass = check_brave_secure_auth($sys_hash, $comment_channel_val);
 			if (!$is_pass) {
-				return get_brave_error_msg('hash_check_fail'); // 评论来源异常
+				return get_brave_error_msg('channel_hash_check_fail'); // 评论来源异常
 			}
 		}
 
@@ -933,14 +933,13 @@ if (!is_user_logged_in()) {
 
 	add_filter('preprocess_comment', 'preprocess_brave_comment', 1);
 
-	/*
-		添加统计代码, 不统计登录用户
-	
+	// 添加统计代码, 不统计登录用户
 	function add_brave_analytics() {
-		
+		if (function_exists(google_analytics())) {
+			return google_analytics();
+		}
 	}
 	add_action('wp_footer', 'add_brave_analytics');
-	*/
 }
 
 // 设置发布日志者的设备信息
