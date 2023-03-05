@@ -3,9 +3,7 @@
 	<div class="footerin clear">
 		<div class="f-name">
 			<?php 
-				$basic_config_array = get_brave_config('basic');
-				$logo = $basic_config_array['logo'];
-				$beian = $basic_config_array['beian'];
+				list('logo' => $logo, 'beian' => $beian) = get_brave_config('basic');
 				if (!empty($logo)) :
 			?>
 				<a id="logo" href="/" title="<?php get_bloginfo('name'); ?>">

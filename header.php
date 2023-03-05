@@ -8,13 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="<?php echo get_bloginfo('name'); ?>">
-<?php 
-	$basic_config_array = get_brave_config('basic');
-	$asset_uri = get_array_key($basic_config_array, 'asset_uri');
-	$site_name = get_array_key($basic_config_array, 'site_name');
-	$home_url = get_array_key($basic_config_array, 'home_url');
-	$logo = get_array_key($basic_config_array, 'logo');
-?>
+<?php list('asset_uri' => $asset_uri, 'site_name'=> $site_name, 'home_url' => $home_url, 'logo' => $logo) = get_brave_config('basic'); ?>
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <title><?php wp_title( '-', true, 'right' ); ?></title>
