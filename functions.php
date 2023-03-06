@@ -37,6 +37,7 @@ remove_action('template_redirect', 'rest_output_link_header', 11);
 
 // add_action('wp_footer', 'wp_print_scripts', 5);
 // add_action('wp_footer', 'wp_print_head_scripts', 5);
+
 // script 移到底部
 add_action('wp_footer', 'wp_enqueue_scripts', 5);
 
@@ -54,9 +55,6 @@ add_filter('big_image_size_threshold', '__return_false');
 // Remove srcset attribute on img label
 add_filter('wp_calculate_image_srcset_meta', '__return_null');
 
-// 加载配置项
-include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
-
 // Disable_image_sizes
 add_filter('intermediate_image_sizes_advanced', 'disable_image_sizes');
 function disable_image_sizes($brave_img_sizes) {
@@ -70,15 +68,16 @@ function disable_image_sizes($brave_img_sizes) {
 	return $brave_img_sizes;
 }
 
-/* 提供对外接口
- * $group string 用于组装函数名称
- * $item string 用于组装参数
+/**
+ * 提供获取配置的对外接口
+ * $group string
+ * $item string
  * @return json
  *
  * 通过 admin-ajax.php 调用的请求示例:
  * 请求参数: action=get_brave_config_intf&group=basic&item=asset_uri
- * 函数解析: 本请求最后会被组成函数调用 get_brave_config('basic', 'asset_uri');
-**/
+ * 函数解析: 本请求最后会被组成函数调用 get_brave_config(basic, asset_uri);
+ */
 add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
 add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
 function get_brave_config_intf() {
@@ -285,7 +284,7 @@ if (get_post_format() === 'gallery') {
 	require_once(get_template_directory() . '/plugin/gallery.php');
 }
 
-// 管理员界面动作
+// 非管理员界面动作
 if (!is_admin()) {
 	// Remove mediaelement
 	function remove_brave_mediaelement_scripts() {
@@ -333,7 +332,8 @@ function get_brave_content_nav() {
 	<?php endif;
 }
 
-/* get_brave_year_of_age 
+/**
+ * get_brave_year_of_age
  * $birth_date date
  * @return string
  */
@@ -346,14 +346,14 @@ function get_brave_year_of_age($birth_date) {
 	}
 	$result = '';
 	if ($interval->format('%y') === '0') {
-		if ($interval->format('%m') == '0') {
+		if ($interval->format('%m') === '0') {
 			if ($interval->format('%d') === '0') {
-				$result = $interval->format('出生');
+				$result = '出生';
 			} else if ($interval->format('%d') > 0) {
-				$result = $prefix . $interval->format('%d天');
+				$result = $interval->format('%d天');
 			}
 		} else if ($interval->format('%m') > 0) {
-			$result = $prefix . $interval->format('%m个月');
+			$result = $interval->format('%m个月');
 		}
 	} else if ($interval->format('%y') > 0) {
 		if ($interval->format('%m') === '0') {
@@ -366,7 +366,7 @@ function get_brave_year_of_age($birth_date) {
 			$result = $interval->format('%y岁%m个月');
 		}
 	}
-	echo $result;
+	echo $prefix . $result;
 }
 
 function get_brave_age() {
@@ -416,7 +416,8 @@ function add_brave_mobile_class($class) {
 
 add_filter('body_class', 'add_brave_mobile_class');
 
-/* 摘要
+/**
+ * 摘要
  * $length int 输出摘要的长度
  * @return string
  */
@@ -765,7 +766,7 @@ function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
 	return substr(str_shuffle($hash_mask), -$hash_length);
 }
 
-/* 
+/**
  * 获取散列值
  * $group string
  * $item string
@@ -777,12 +778,12 @@ function get_brave_secure_auth($group, $item) {
 
 }
 
-/* 
+/**
  * 校验散列值
  * $group string
  * $item string
  * $user_hash string
- * @return boolean 校验通过返回 true;否则,返回 false
+ * @return boolean 校验通过返回 true; 否则, 返回 false
 */
 function check_brave_secure_auth($sys_hash, $user_hash) {
 	return hash_equals($sys_hash, $user_hash);
@@ -1067,22 +1068,17 @@ function set_brave_comment_device_meta($comment_ID) {
 
 add_action('wp_insert_comment', 'set_brave_comment_device_meta', 10, 2);
 
-/* 修改符合条件的评论状态为待审核
+/**
+ * 修改符合条件的评论状态为待审核
  * 此函数不能单独使用, 需要将本函数添加为 pre_comment_approved 的动作, 当 wp 核心程序调用 do_action() 时触发 pre_comment_approved 动作并执行本函数
  * $approved int|string|WP_Error
  * $commentdata array
  */
 function modify_brave_comment_approved($approved, $commentdata) {
-	/* 不需要这些判断
-	$key = 'comment_author_' . $check_key_word;
-	if (get_array_key($commentdata, $key) === $check_key_word_value) {
-		$approved = 0;
-	}
-	*/
 	return $approved = 0;
 }
 
-/*	
+/**
  * 发布时自动置为私密
  * $postarr['ID'] 获取 post_id
  * add_filter 中的第4个参数用于指定给 auto_brave_private_post_format 函数传几个参数
@@ -1098,7 +1094,8 @@ function auto_private_brave_post_format($data, $postarr) {
 
 add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 10, 2);
 
-/* 异常评论错误提示
+/**
+ * 异常评论错误提示
  * $comment_status String {spam | hold}
  * $check_type String: {email | IP}
  * $count Int
@@ -1127,11 +1124,21 @@ function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL
 	}
 }
 
+// 加载插件
+include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
+
 // 加载 like 插件
 include_once(get_template_directory() . '/plugin/like.php');
+
 // 加载广告配置
 include_once(get_template_directory() . '/plugin/display_ad.php');
 
+/**
+ * 获取配置
+ * $group string
+ * $item string
+ * @return string | array
+ */
 function get_brave_config($group, $item = NULL) {
 	static $conf_obj, $cached_result = array();
 	
@@ -1145,9 +1152,7 @@ function get_brave_config($group, $item = NULL) {
 		include_once(get_template_directory() . '/conf/config.php');
 		$conf_obj = new Config();
 	}
-	/* 获取闭包函数 
-	 * 闭包函数返回 $group 键对应的元素
-	*/
+	// 获取闭包函数, 闭包函数返回 $group 键对应的元素
 	$func = $conf_obj->get_config($group);
 	$group_array = $func();
 	
