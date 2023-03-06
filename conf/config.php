@@ -14,7 +14,7 @@ class Config {
 				'site_name' => get_bloginfo('name'),
 				'time_zone' => timezone_open(get_option('timezone_string')), // timezone 时区
 				'asset_uri' => get_stylesheet_directory_uri() . '/assets', // css, js 文件路径
-				'logo' => '', // logo url
+				'logo' => '', // logo url 填入 logo url 将覆盖默认的图标
 				'beian' => '此处填写备案号', // 备案号
 				'enable_post_format' => array(
 					'standard', 'aside', 'chat', 'gallery', 'link', 'image', 'quote', 'status', 'video', 'audio'
