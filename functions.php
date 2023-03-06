@@ -155,7 +155,7 @@ if (!isset($content_width)) {
 	$content_width = 1200;
 }
 
-function clear_brave_nav_menu_item_id($id, $item, $args) {
+function clear_brave_nav_menu_item_id($item_id, $item, $args) {
 	return '';
 }
 
@@ -257,6 +257,7 @@ function reset_brave_content_image_sizes_attr($sizes, $size) {
 
 add_filter('wp_calculate_image_sizes', 'reset_brave_content_image_sizes_attr', 10, 2);
 
+// Post thumbnail
 function get_brave_post_thumbnail() {
 	if (post_password_required() || is_attachment() || !has_post_thumbnail()) {
 		return;
@@ -272,6 +273,7 @@ function get_brave_post_thumbnail() {
 	<?php endif;
 }
 
+// 设置摘要长度
 function set_brave_excerpt_length($length) {
 	return get_brave_config('basic', 'excerpt_length');
 }
@@ -747,9 +749,9 @@ function make_brave_filename_hash($filename) {
 	$info = pathinfo($filename);
 	$ext = empty($info['extension']) ? '' : '.' . $info['extension'];
 	$name = basename($filename, $ext);
-	$hash_length = rand(8, 14);
+	$hash_length = rand(8, 16);
 	$hash_string = get_brave_hash($hash_length);
-	$filename = $name . "_" . $hash_string . $ext;
+	$filename = $name . '_' . $hash_string . $ext;
 	return $filename;
 }
 
@@ -757,7 +759,7 @@ add_filter('sanitize_file_name', 'make_brave_filename_hash');
 
 // 生成随机字符串
 function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
-	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 14) : abs($hash_length);
+	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 16) : abs($hash_length);
 	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 	return substr(str_shuffle($hash_mask), -$hash_length);
 }
@@ -799,7 +801,7 @@ function get_brave_comment_text_field() {
  */
 function get_array_key($array, $key) {
 	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
-		return NULL;
+		return;
 	}
 	
 	// 传入的是索引
@@ -812,13 +814,11 @@ function get_array_key($array, $key) {
 	$count_item = count($item_array);
 	for ($i = 0; $i < $count_item; $i++) {
 		$key = $item_array[$i];
-		if (is_array($array)) {
-			// 获取下一层
-			$array = $array[$key];
-		} else {
-			// 非数组无法获取下一层
-			$array = NULL;
+		if (!is_array($array)) {
+			$array = NULL; // 非数组无法获取下一层, 置为 NULL 并跳出
 			break;
+		} else {
+			$array = $array[$key]; // 获取下一层
 		}
 	}
 	return $array;
@@ -958,8 +958,8 @@ if (!is_user_logged_in()) {
 
 	// 添加统计代码, 不统计登录用户
 	function add_brave_analytics() {
-		if (function_exists(google_analytics())) {
-			return google_analytics();
+		if (function_exists(get_brave_analytics())) {
+			return get_brave_analytics();
 		}
 	}
 	add_action('wp_footer', 'add_brave_analytics');
@@ -967,70 +967,49 @@ if (!is_user_logged_in()) {
 
 // 设置发布日志者的设备信息
 function set_brave_post_device_meta($post_id, $post, $update) {
-	// 更新操作不处理
-	if ($update) {
+	// 更新操作不处理, 自动保存不处理
+	if ($update || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
 		return;
 	}
-
-	// 自动保存不处理
-	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-		return;
-	}
-
-	$current_post_device_name = get_post_meta($post->ID, 'post_device_name', true);
-	$current_post_device_ver = get_post_meta($post->ID, 'post_device_ver', true);
-
-	$current_time = date_create(date('Y-m-d H:i:s'));
-	$post_time = date_create(get_the_time('Y-m-d H:i:s'));
-	if (is_null($post_time)) {
-		$post_time = $current_time;
-	}
-	$interval = date_diff($post_time, $current_time);
-
-	// 已记录的/已发布的/私密的不做更新
-	if (current_user_can('edit_post', $post_id) && ($interval->format('%s') <= 12) && !in_array(get_post_status($post_id), array('private', 'publish'))) {
-		$detect = new Mobile_Detect;
-		if ($detect->isMobile() && !$detect->isTablet()) {
-			// 手机
-			if ($detect->isiPhone()) {
-				$device_name = 'iPhone';
-				$device_ver = $detect->version('iOS');
-			} else if ($detect->isAndroidOS()) {
-				$device_name = 'Android';
-				$device_ver = $detect->version('Android');
-			}
-		} else if ($detect->isMobile() && $detect->isTablet()) {
-			// 平板
-			if ($detect->isiPad()) {
-				$device_name = 'iPad';
-				$device_ver = $detect->version('iOS');
-			} else if ($detect->isKindle()) {
-				$device_name = 'Kindle';
-			} else if ($detect->isAndroidOS()) {
-				$device_name = 'Android Tablet';
-				$device_ver = $detect->version('Android');
-			}
-		} else {
-			// 桌面
-			if ($detect->version('Chrome')) {
-				$device_name = 'Chrome';
-				$device_ver = $detect->version('Chrome');
-			} else if ($detect->version('Firefox')) {
-				$device_name = 'Firefox';
-				$device_ver = $detect->version('Firefox');
-			} else if ($detect->version('Safari')) {
-				$device_name = 'Safari';
-				$device_ver = $detect->version('Safari');
-			}
+	
+	$detect = new Mobile_Detect;
+	if ($detect->isMobile() && !$detect->isTablet()) {
+		// 手机
+		if ($detect->isiPhone()) {
+			$device_name = 'iPhone';
+			$device_ver = $detect->version('iOS');
+		} else if ($detect->isAndroidOS()) {
+			$device_name = 'Android';
+			$device_ver = $detect->version('Android');
 		}
-		$current_post_device_name = $device_name;
-		$current_post_device_ver = $device_ver;
-		if (!empty($current_post_device_name)) {
-			update_post_meta($post_id, 'post_device_name', $current_post_device_name);
-			update_post_meta($post_id, 'post_device_ver', $current_post_device_ver);
+	} else if ($detect->isMobile() && $detect->isTablet()) {
+		// 平板
+		if ($detect->isiPad()) {
+			$device_name = 'iPad';
+			$device_ver = $detect->version('iOS');
+		} else if ($detect->isKindle()) {
+			$device_name = 'Kindle';
+		} else if ($detect->isAndroidOS()) {
+			$device_name = 'Android Tablet';
+			$device_ver = $detect->version('Android');
 		}
 	} else {
-		return;
+		// 桌面
+		if ($detect->version('Chrome')) {
+			$device_name = 'Chrome';
+			$device_ver = $detect->version('Chrome');
+		} else if ($detect->version('Firefox')) {
+			$device_name = 'Firefox';
+			$device_ver = $detect->version('Firefox');
+		} else if ($detect->version('Safari')) {
+			$device_name = 'Safari';
+			$device_ver = $detect->version('Safari');
+		}
+	}
+	
+	if (!empty($device_name)) {
+		update_post_meta($post_id, 'post_device_name', $device_name);
+		update_post_meta($post_id, 'post_device_ver', $device_ver);
 	}
 }
 
@@ -1038,8 +1017,6 @@ add_action('save_post', 'set_brave_post_device_meta', 10, 3);
 
 // 设置发布评论者的设备信息
 function set_brave_comment_device_meta($comment_ID) {
-	$current_comment_device_name = get_comment_meta($comment->ID, 'comment_device_name', true);
-	$current_comment_device_ver = get_comment_meta($comment->ID, 'comment_device_ver', true);
 	if (!current_user_can('administrator') && !is_admin()) {
 		$detect = new Mobile_Detect;
 		if ($detect->isMobile() && !$detect->isTablet()) {
