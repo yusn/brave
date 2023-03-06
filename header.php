@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
+<?php list('asset_uri' => $asset_uri, 'site_name' => $site_name, 'home_url' => $home_url, 'logo' => $logo) = get_brave_config('basic'); ?>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
 <link rel="profile" href="//gmpg.org/xfn/11" />
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="<?php echo get_bloginfo('name'); ?>">
-<?php list('asset_uri' => $asset_uri, 'site_name' => $site_name, 'home_url' => $home_url, 'logo' => $logo) = get_brave_config('basic'); ?>
+<meta name="apple-mobile-web-app-title" content="<?php echo $site_name; ?>">
 <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="<?php echo $asset_uri; ?>/launch-m.png">
 <title><?php wp_title( '-', true, 'right' ); ?></title>
