@@ -17,8 +17,8 @@ class Config {
 				'logo' => '', // logo url
 				'beian' => '此处填写备案号', // 备案号
 				'enable_post_format' => array(
-					'standard', 'aside', 'status', 'chat', 'quote'
-				),
+					'standard', 'aside', 'chat', 'gallery', 'link', 'image', 'quote', 'status', 'video', 'audio'
+				), // 要启用的格式
 				'post_format_name' => array(
 					'Standard' => '标准',
 					'Aside' => '博客',
@@ -30,18 +30,18 @@ class Config {
 					'Status' => '状态',
 					'Audio' => '音频',
 					'Chat' => '聊天'
-				),
+				), // 自定义格式名称
 				'send_mail' => array(
 					'to' => get_bloginfo('admin_email'), // 邮件接收人
 				),
 			),
 			'query' => array(
-				// feed控制参数
+				// feed 过滤参数
 				'feed' => array(
 					'after_date' => '7 days ago', // feed 输出内容的的起始时间
 					'terms_not_in' => array(), // 排除的日志格式
 				),
-				// 首页查询控制参数
+				// 首页查询过滤参数
 				'home' => array(
 					'terms_not_in' => array('post-format-aside', 'post-format-status', 'post-format-chat', 'post-format-quote', 'post-format-audio', 'post-format-video', 'post-format-link'),
 				),
@@ -60,7 +60,7 @@ class Config {
 				),
 				'role' => array(
 				),
-				'auto_private_post_format' => array(), // 发布时自动加密的格式
+				'auto_private_post_format' => array(), // 发布时自动加密的格式, 如希望 status 和 link 在发布时自动加密, 请填入: 'status', 'link'
 			),
 			// 错误配置参数
 			'error' => array(
