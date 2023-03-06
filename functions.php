@@ -396,7 +396,8 @@ function display_brave_ad($type) {
 
 // 搜索页面的日期显示格式
 function get_brave_search_date() {
-	$role = get_brave_config('custom', 'role');
+	$format = get_post_format();
+	$role = get_brave_config('custom', 'role.' . $format);
 	if (!empty($role)) {
 		return get_brave_age();
 	} else {
@@ -818,7 +819,7 @@ function get_array_key($array, $key) {
 			$array = NULL; // 非数组无法获取下一层, 置为 NULL 并跳出
 			break;
 		} else {
-			$array = $array[$key]; // 获取下一层
+			$array = array_key_exists($key, $array) ? $array[$key] : NULL; // 获取下一层, 获取不存在的 key 会报警告(Notice)
 		}
 	}
 	return $array;
