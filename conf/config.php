@@ -120,7 +120,7 @@ class Config {
 				),
 				'threshold' => array( // 评论控制数量阈值, 超过阈值将触发错误处理逻辑
 					'spam' => 1, // 垃圾评论零容忍, 该对象存在 1 条垃圾评论或放在回收站的评论即触发
-					'hold' => 2, // 为 2 则最多容许该对象生成 2 条待审核评论, 超过则不允许继续提交评论
+					'hold' => 3, // 为 3 则最多容许该对象生成 3 条待审核评论, 超过则不允许继续提交评论
 					'approve' => 9, // 已通过的评论, 为 9 则指定时间段内该对象存在 9 条评论后, 后续该对象的评论会被置为待审核
 				),
 			),
@@ -131,7 +131,7 @@ class Config {
 	/* 取分组数组内的元素 */
 	public function get_config($group) {
 		$group = $this->config_array[$group];
-		return function() use(&$group) {
+		return function() use($group) {
 			return $group;
 		};
 	}
