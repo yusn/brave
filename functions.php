@@ -969,6 +969,65 @@ if (!is_user_logged_in()) {
 	add_action('wp_footer', 'add_brave_analytics');
 }
 
+/**
+ * 正则替换
+ * $val | $key 通过 array_walk 传入的 value 和 key 对
+ * $args array 第一个元素为模式数组, 第二个元素为过滤 $key 的数组 (仅处理包含于其中的 $key)
+ * $pattern_array array 两个元素的数组, 第一个元素为模式, 第二个元素为替换字符串: https://www.php.net/manual/zh/function.preg-replace.php
+ */
+function get_brave_replace(&$val, $key, $args = []) {
+	if (!is_array($args) || count($args) < 2) {
+		return;
+	}
+	$pattern_array = $args[0];
+	$pick_array = $args[1];
+	// $pattern_array 为空 或 $pick_array 为空 或 非目标 $key 返回
+	if (empty($pattern_array) || empty($pick_array) || !in_array($key, $pick_array)) {
+		return;
+	}
+	foreach ($pattern_array as $pattern) {
+		$val = preg_replace($pattern[0], $pattern[1], $val);
+	}
+}
+
+function auto_brave_post_space ($data, $postarr, $unsanitized_postarr, $update) {
+	$pick_array = get_brave_config('basic', 'auto_space_field');
+	$pattern_array = array(
+		/** Pattern 来源
+		 * @package   Space_Lover
+		 * @author    Tunghsiao Liu <t@sparanoid.com>
+		 * @license   GPL-2.0+
+		 * @link      https://sparanoid.com/
+		 * @copyright Sparanoid
+		 * GitHub Plugin URI: https://github.com/sparanoid/space-lover
+		 */
+		
+		// Space for opneing (Ps) and closing (Pe) punctuations
+		['~(\p{Han})([a-zA-Z0-9\p{Ps}\p{Pi}])(?![^<]*>)~u', '\1 \2'],
+		['~([a-zA-Z0-9\p{Pe}\p{Pf}])(\p{Han})(?![^<]*>)~u', '\1 \2'],
+		
+		// Space for general punctuations
+		['~([!?‽:;,.%])(\p{Han})~u', '\1 \2'],
+		['~(\p{Han})([@$#])~u', '\1 \2'],
+		
+		// Space fix for 'ampersand' character https://regex101.com/r/hU3wD2/13
+		['~(&amp;?(?:amp)?;) (\p{Han})(?![^<]*>)~u', '\1\2'],
+		
+		// Space for HTML tags
+		['~(\p{Han})(<(?!ruby)[a-zA-Z]+?[^>]*?>)([a-zA-Z0-9\p{Ps}\p{Pi}@$#])~u', '\1 \2\3'],
+		['~(\p{Han})(<\/(?!ruby)[a-zA-Z]+>)([a-zA-Z0-9])~u', '\1\2 \3'],
+		['~([a-zA-Z0-9\p{Pe}\p{Pf}!?‽:;,.%])(<(?!ruby)[a-zA-Z]+?[^>]*?>)(\p{Han})~u', '\1 \2\3'],
+		['~([a-zA-Z0-9\p{Ps}\p{Pi}!?‽:;,.%])(<\/(?!ruby)[a-zA-Z]+>)(\p{Han})~u', '\1\2 \3'],
+		['~[ ]*([「」『』（）〈〉《》【】〔〕〖〗〘〙〚〛])[ ]*~u', '\1']
+	);
+	array_walk($data, 'get_brave_replace', [$pattern_array, $pick_array]);
+	return $data;
+}
+
+if (get_brave_config('basic', 'auto_space')) {
+	add_filter( 'wp_insert_post_data', 'auto_brave_post_space', 10, 4);
+}
+
 // 设置发布日志者的设备信息
 function set_brave_post_device_meta($post_id, $post, $update) {
 	// 更新操作不处理, 自动保存不处理
