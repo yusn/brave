@@ -7,6 +7,7 @@ class Config {
 	// 初始化私有变量(声明时不能使用表达式)
 	public function __construct() {
 		$this->config_array = array(
+			/***** 可修改的配置项 开始 *****/
 			'basic' => array(
 				'excerpt_length' => 200, // 摘要的长度
 				'display_ad' => false, // boolean 广告控制 true 显示广告, false 不显示
@@ -110,25 +111,27 @@ class Config {
 					'approve' => '1 hour ago', // 根据 email 控制已审核评论参照的开始时间
 				),
 				'comment_text_field' => 'little_star', // 评论文本框字段名称
+				// comment_status_convert_array 项是固定值不可修改
 				'comment_status_convert_array' => array(
 					'hold' => '0',
 					'spam' => 'spam',
 					'trash' => 'trash',
 					'approve' => '1',
 				),
-				'threshold' => array( // 评论控制数量阈值, 实际值等于 n+1 , 超过阈值将触发错误处理逻辑
-					'spam' => 0, // 垃圾评论零容忍, 该对象存在一条垃圾评论或放在回收站的评论即触发
-					'hold' => 2, // 为 2 则最多容许该对象生成3条待审核评论, 超过则不允许继续提交评论
-					'approve' => 9, // 已通过的评论, 为 9 则指定时间段内该对象存在 10 条评论后, 后续该对象的评论会被置为待审核
+				'threshold' => array( // 评论控制数量阈值, 超过阈值将触发错误处理逻辑
+					'spam' => 1, // 垃圾评论零容忍, 该对象存在 1 条垃圾评论或放在回收站的评论即触发
+					'hold' => 2, // 为 2 则最多容许该对象生成 2 条待审核评论, 超过则不允许继续提交评论
+					'approve' => 9, // 已通过的评论, 为 9 则指定时间段内该对象存在 9 条评论后, 后续该对象的评论会被置为待审核
 				),
 			),
+			/***** 可修改的配置项 结束 *****/
 		);
 	}
 	
 	/* 取分组数组内的元素 */
 	public function get_config($group) {
 		$group = $this->config_array[$group];
-		return function($item = NULL) use(&$group) {
+		return function() use(&$group) {
 			return $group;
 		};
 	}

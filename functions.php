@@ -628,7 +628,7 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 	// 获取评论条数
 	$count_spam = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
 	$threshold = get_array_key($thresholdArray, $comment_status);
-	if ($count_spam > $threshold) {
+	if ($count_spam >= $threshold) {
 		return get_brave_comment_error_msg($comment_status, $check_key_word, $count_spam);
 	}
 
@@ -638,7 +638,7 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 	// 获取评论条数
 	$count_hold = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
 	$threshold = get_array_key($thresholdArray, $comment_status);
-	if ($count_hold > $threshold) {
+	if ($count_hold >= $threshold) {
 		return get_brave_comment_error_msg($comment_status, $check_key_word, $count_hold);
 	}
 
@@ -649,7 +649,7 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 	$comment_status_array = array($comment_status); // 已通过
 	$count_approve = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
 	$threshold = get_array_key($thresholdArray, $comment_status);
-	if ($count_approve > $threshold) {
+	if ($count_approve >= $threshold) {
 		return add_action('pre_comment_approved', 'modify_brave_comment_approved', 99, 2);
 	}
 }
