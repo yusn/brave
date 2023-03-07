@@ -1,4 +1,5 @@
 <?php
+
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('admin_print_scripts', 'print_emoji_detection_script');
 remove_action('wp_print_styles', 'print_emoji_styles');
@@ -80,6 +81,7 @@ function disable_image_sizes($brave_img_sizes) {
  */
 add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
 add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
+
 function get_brave_config_intf() {
 	$group = sanitize_text_field($_REQUEST['group']);
 	$item = sanitize_text_field($_REQUEST['item']);
@@ -209,6 +211,7 @@ function exclude_brave_post_from_query($query) {
 
 add_action('pre_get_posts', 'exclude_brave_post_from_query');
 
+// 格式化标题
 function format_brave_title($title, $sep) {
 	global $paged, $page;
 	if (is_feed()) {
@@ -314,7 +317,7 @@ if (!is_admin()) {
 	add_filter('excerpt_more', 'customize_brave_excerpt_more');
 }
 
-// 搜索框
+// 自定义搜索框
 function get_brave_search_form($form) {
 	$form = '<form id="search" role="search" method="get" action="' . home_url('/') . '" >
 	<input class="b_r inp text_box" type="text" value="' . get_search_query() . '" name="s" /><input type="submit" class="b_r btn" value="' . esc_attr__('搜索', 'brave') . '" />
@@ -475,7 +478,7 @@ function get_brave_post_meta() {
 	}
 }
 
-// get post device info
+// 获取日志的发布来源 (发布日志的设备信息)
 function get_brave_post_device() {
 	global $post;
 	$post_device_name = get_post_meta($post->ID, 'post_device_name', true);
@@ -549,7 +552,6 @@ function replace_brave_avatar($avatar) {
 
 add_filter('get_avatar', 'replace_brave_avatar', 10, 3);
 
-
 function modify_brave_comment_class($class) {
 	// Add class to parent comment, for Infinite Ajax Scroll
 	$current_comment = get_comment();
@@ -570,7 +572,6 @@ add_filter('comment_class', 'modify_brave_comment_class');
 
 // Customize comment
 function brave_comment($comment, $args, $depth) {
-	global $comment;
 	switch ($comment->comment_type) {
 		case 'pingback' :
 		case 'trackback' :
@@ -655,10 +656,10 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 }
 
 /**
- * 获取评论信息
- * $check_key_word String
- * $comment_status_array Array
- * $check_key_word_value
+ * 获取评论条数
+ * $check_key_word String 根据此条件统计评论数量, 如 Email 或 IP
+ * $comment_status_array Array 需要统计的评论状态
+ * $check_key_word_value $check_key_word 的条件值
  * @return int
  */
 function get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value) {
@@ -748,7 +749,10 @@ function add_brave_comment_at($comment_text, $comment = '') {
 
 add_filter('comment_text', 'add_brave_comment_at', 20, 2);
 
-// 上传文件时生成随机文件名
+/**
+ * 上传文件自动在文件名后面附件随机字符串 (为了安全)
+ * https://developer.wordpress.org/reference/hooks/sanitize_file_name/
+*/
 function make_brave_filename_hash($filename) {
 	$info = pathinfo($filename);
 	$ext = empty($info['extension']) ? '' : '.' . $info['extension'];
@@ -760,13 +764,6 @@ function make_brave_filename_hash($filename) {
 }
 
 add_filter('sanitize_file_name', 'make_brave_filename_hash');
-
-// 生成随机字符串
-function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
-	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 16) : abs($hash_length);
-	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-	return substr(str_shuffle($hash_mask), -$hash_length);
-}
 
 /**
  * 获取散列值
@@ -782,8 +779,6 @@ function get_brave_secure_auth($group, $item) {
 
 /**
  * 校验散列值
- * $group string
- * $item string
  * $user_hash string
  * @return boolean 校验通过返回 true; 否则, 返回 false
 */
@@ -795,60 +790,6 @@ function check_brave_secure_auth($sys_hash, $user_hash) {
 function get_brave_comment_text_field() {
 	$comment_text_field = get_brave_config('comment', 'comment_text_field');
 	return (!empty($comment_text_field) && is_string($comment_text_field)) ? $comment_text_field : 'brave_comment';
-}
-
-/**
- * 获取数组键值
- * $array array
- * $key string | Int 数组键 或 数组索引。 支持多级键, 以.号分隔, 示例: get_array_key(array, 'key1.key2');
- * @return
- */
-function get_array_key($array, $key) {
-	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
-		return;
-	}
-	
-	// 传入的是索引
-	if (is_int($key)) {
-		return array_key_exists($key, $array) ? $array[$key] : NULL;
-	}
-	
-	// 传入的是键
-	$item_array = explode('.', $key);
-	$count_item = count($item_array);
-	for ($i = 0; $i < $count_item; $i++) {
-		$key = $item_array[$i];
-		if (!is_array($array)) {
-			$array = NULL; // 非数组无法获取下一层, 置为 NULL 并跳出
-			break;
-		} else {
-			$array = array_key_exists($key, $array) ? $array[$key] : NULL; // 获取下一层, 获取不存在的 key 会报警告(Notice)
-		}
-	}
-	return $array;
-}
-
-/**
- * 移除数组键值
- * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
- * $key string
- * @return
- * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
- */
-function remove_array_key(&$array, $key) {
-	if (array_key_exists($key, $array)) {
-		unset($array[$key]);
-	}
-}
-
-/**
- * 设置数组键值
- * $array array
- * $key string
- * @return
- */
-function set_array_key(&$array, $key, $val) {
-	$array[$key] = $val;
 }
 
 // 阻止浏览器缓存
@@ -910,27 +851,6 @@ function add_brave_post_format_to_title_rss($title) {
 
 add_filter('the_title_rss', 'add_brave_post_format_to_title_rss');
 
-// 获取错误信息
-function get_brave_error_msg($error_name, $title = NULL) {
-	$error_key = get_brave_config('error', 'code.' . $error_name);
-	$error_val = '<strong>错误：</strong>' . get_brave_config('error', 'msg.' . $error_key);
-	return get_brave_die($error_key, $error_val, $title);
-}
-
-// 生成错误信息
-function get_brave_die($error_key, $error_val, $title = NULL) {
-	$title = empty($title) ? '出现异常, 请确认!' : $title; // eg: Comment Submission Failure
-	clear_brave_cache();
-	wp_die(
-		'<p>' . $error_val . '代码: ' . $error_key . '</p>',
-		__($title),
-		array(
-			'response' => $error_key,
-			'back_link' => true,
-		)
-	);
-}
-
 if (!is_user_logged_in()) {
 	// 非登陆用户评论预处理
 	function preprocess_brave_comment($commentdata) {
@@ -966,6 +886,7 @@ if (!is_user_logged_in()) {
 			return get_brave_analytics();
 		}
 	}
+	
 	add_action('wp_footer', 'add_brave_analytics');
 }
 
@@ -975,60 +896,46 @@ if (!is_user_logged_in()) {
  * $args array 第一个元素为模式数组, 第二个元素为过滤 $key 的数组 (仅处理包含于其中的 $key)
  * $pattern_array array 两个元素的数组, 第一个元素为模式, 第二个元素为替换字符串: https://www.php.net/manual/zh/function.preg-replace.php
  */
-function get_brave_replace(&$val, $key, $args = []) {
-	if (!is_array($args) || count($args) < 2) {
-		return;
-	}
-	$pattern_array = $args[0];
-	$pick_array = $args[1];
-	// $pattern_array 为空 或 $pick_array 为空 或 非目标 $key 返回
-	if (empty($pattern_array) || empty($pick_array) || !in_array($key, $pick_array)) {
-		return;
-	}
-	foreach ($pattern_array as $pattern) {
-		$val = preg_replace($pattern[0], $pattern[1], $val);
-	}
+function get_brave_replace(&$data, $pattern_array, $replacement_array) {
+	$data = preg_replace($pattern_array, $replacement_array, $data);
 }
 
-function auto_brave_post_space ($data, $postarr, $unsanitized_postarr, $update) {
-	$pick_array = get_brave_config('basic', 'auto_space_field');
+// 发布或更新日志时自动增加汉字和英文字符间的空格
+function auto_brave_post_space($data, $postarr, $unsanitized_postarr, $update) {
+	$pick_field_array = get_brave_config('basic', 'auto_space_field');
 	$pattern_array = array(
 		/** Pattern 来源
-		 * @package   Space_Lover
 		 * @author    Tunghsiao Liu <t@sparanoid.com>
-		 * @license   GPL-2.0+
 		 * @link      https://sparanoid.com/
 		 * @copyright Sparanoid
 		 * GitHub Plugin URI: https://github.com/sparanoid/space-lover
 		 */
-		
 		// Space for opneing (Ps) and closing (Pe) punctuations
-		['~(\p{Han})([a-zA-Z0-9\p{Ps}\p{Pi}])(?![^<]*>)~u', '\1 \2'],
-		['~([a-zA-Z0-9\p{Pe}\p{Pf}])(\p{Han})(?![^<]*>)~u', '\1 \2'],
-		
+		'~(\p{Han})([a-zA-Z0-9\p{Ps}\p{Pi}])(?![^<]*>)~u',
+		'~([a-zA-Z0-9\p{Pe}\p{Pf}])(\p{Han})(?![^<]*>)~u',
 		// Space for general punctuations
-		['~([!?‽:;,.%])(\p{Han})~u', '\1 \2'],
-		['~(\p{Han})([@$#])~u', '\1 \2'],
-		
+		'~([!?‽:;,.%])(\p{Han})~u',
+		'~(\p{Han})([@$#])~u',
 		// Space fix for 'ampersand' character https://regex101.com/r/hU3wD2/13
-		['~(&amp;?(?:amp)?;) (\p{Han})(?![^<]*>)~u', '\1\2'],
-		
+		'~(&amp;?(?:amp)?;) (\p{Han})(?![^<]*>)~u',
 		// Space for HTML tags
-		['~(\p{Han})(<(?!ruby)[a-zA-Z]+?[^>]*?>)([a-zA-Z0-9\p{Ps}\p{Pi}@$#])~u', '\1 \2\3'],
-		['~(\p{Han})(<\/(?!ruby)[a-zA-Z]+>)([a-zA-Z0-9])~u', '\1\2 \3'],
-		['~([a-zA-Z0-9\p{Pe}\p{Pf}!?‽:;,.%])(<(?!ruby)[a-zA-Z]+?[^>]*?>)(\p{Han})~u', '\1 \2\3'],
-		['~([a-zA-Z0-9\p{Ps}\p{Pi}!?‽:;,.%])(<\/(?!ruby)[a-zA-Z]+>)(\p{Han})~u', '\1\2 \3'],
-		['~[ ]*([「」『』（）〈〉《》【】〔〕〖〗〘〙〚〛])[ ]*~u', '\1']
+		'~(\p{Han})(<(?!ruby)[a-zA-Z]+?[^>]*?>)([a-zA-Z0-9\p{Ps}\p{Pi}@$#])~u',
+		'~(\p{Han})(<\/(?!ruby)[a-zA-Z]+>)([a-zA-Z0-9])~u',
+		'~([a-zA-Z0-9\p{Pe}\p{Pf}!?‽:;,.%])(<(?!ruby)[a-zA-Z]+?[^>]*?>)(\p{Han})~u',
+		'~([a-zA-Z0-9\p{Ps}\p{Pi}!?‽:;,.%])(<\/(?!ruby)[a-zA-Z]+>)(\p{Han})~u',
+		'~[ ]*([「」『』（）〈〉《》【】〔〕〖〗〘〙〚〛])[ ]*~u',
 	);
-	array_walk($data, 'get_brave_replace', [$pattern_array, $pick_array]);
-	return $data;
+	$replacement_array = array('\1 \2', '\1 \2', '\1 \2', '\1 \2', '\1\2', '\1 \2\3', '\1\2 \3', '\1 \2\3', '\1\2 \3', '\1',);
+	$pick_data = pick_array($data, $pick_field_array);
+	get_brave_replace($pick_data, $pattern_array, $replacement_array);
+	return array_merge($data, $pick_data);
 }
 
 if (get_brave_config('basic', 'auto_space')) {
 	add_filter( 'wp_insert_post_data', 'auto_brave_post_space', 10, 4);
 }
 
-// 设置发布日志者的设备信息
+// 发布日志时保存发布者的设备信息
 function set_brave_post_device_meta($post_id, $post, $update) {
 	// 更新操作不处理, 自动保存不处理
 	if ($update || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
@@ -1078,7 +985,7 @@ function set_brave_post_device_meta($post_id, $post, $update) {
 
 add_action('save_post', 'set_brave_post_device_meta', 10, 3);
 
-// 设置发布评论者的设备信息
+// 保存评论者的设备信息
 function set_brave_comment_device_meta($comment_ID) {
 	if (!current_user_can('administrator') && !is_admin()) {
 		$detect = new Mobile_Detect;
@@ -1127,7 +1034,7 @@ function set_brave_comment_device_meta($comment_ID) {
 	}
 }
 
-add_action('wp_insert_comment', 'set_brave_comment_device_meta', 10, 2);
+add_action('wp_insert_comment', 'set_brave_comment_device_meta', 10, 1);
 
 /**
  * 修改符合条件的评论状态为待审核
@@ -1185,14 +1092,17 @@ function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL
 	}
 }
 
-// 加载插件
-include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
-
-// 加载 like 插件
-include_once(get_template_directory() . '/plugin/like.php');
-
-// 加载广告配置
-include_once(get_template_directory() . '/plugin/display_ad.php');
+/**
+ * 获取错误信息
+ * $error_name 错误代码 config.php 'error' -> 'code' 下配置的错误代码
+ * $title string 错误页面标题 (网页标题)
+ * @return function
+ */
+function get_brave_error_msg($error_name, $title = NULL) {
+	$error_key = get_brave_config('error', 'code.' . $error_name);
+	$error_val = '<strong>错误：</strong>' . get_brave_config('error', 'msg.' . $error_key);
+	return get_brave_die($error_key, $error_val, $title);
+}
 
 /**
  * 获取配置
@@ -1224,4 +1134,120 @@ function get_brave_config($group, $item = NULL) {
 	return empty($item) ? $group_array : get_array_key($group_array, $item);
 }
 
+// 加载 Mobile_Detect 插件
+include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
+
+// 加载 like 插件
+include_once(get_template_directory() . '/plugin/like.php');
+
+// 加载广告配置
+include_once(get_template_directory() . '/plugin/display_ad.php');
+
+/**** Tool START ****/
+
+/**
+ * 生成随机字符串
+ * $hash_length int 想要的随机字符串长度 低于4位会自动重置为 8 - 16 的随机长度
+ * $hash_mask string 随机字符串的来源
+ */
+function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
+	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 16) : abs($hash_length);
+	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+	return substr(str_shuffle($hash_mask), -$hash_length);
+}
+
+/**
+ * 获取数组键值
+ * $array array
+ * $key string | Int 数组键 或 数组索引。 支持多级键, 以.号分隔, 示例: get_array_key(array, 'key1.key2');
+ * @return
+ */
+function get_array_key($array, $key) {
+	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
+		return;
+	}
+	
+	// 传入的是索引
+	if (is_int($key)) {
+		return array_key_exists($key, $array) ? $array[$key] : NULL;
+	}
+	
+	// 传入的是键
+	$item_array = explode('.', $key);
+	$count_item = count($item_array);
+	for ($i = 0; $i < $count_item; $i++) {
+		$key = $item_array[$i];
+		if (!is_array($array)) {
+			$array = NULL; // 非数组无法获取下一层, 置为 NULL 并跳出
+			break;
+		} else {
+			$array = array_key_exists($key, $array) ? $array[$key] : NULL; // 获取下一层, 获取不存在的 key 会报警告(Notice)
+		}
+	}
+	return $array;
+}
+
+/**
+ * 移除数组键值
+ * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
+ * $key string
+ * @return
+ * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
+ */
+function remove_array_key(&$array, $key) {
+	if (array_key_exists($key, $array)) {
+		unset($array[$key]);
+	}
+}
+
+/**
+ * 设置数组键值
+ * $array array
+ * $key string
+ * @return
+ */
+function set_array_key(&$array, $key, $val) {
+	$array[$key] = $val;
+}
+
+/**
+ * 生成错误信息: 其实就是对 wp_die 的包装
+ * $error_key int|string 错误代码
+ * $error_val string 错误详情
+ * $title string 错误页面标题 (网页标题)
+ * @return WP_Error
+ */
+function get_brave_die($error_key, $error_val, $title = NULL) {
+	$title = empty($title) ? '出现异常, 请确认!' : $title; // eg: Comment Submission Failure
+	clear_brave_cache();
+	wp_die(
+		'<p>' . $error_val . '代码: ' . $error_key . '</p>',
+		__($title),
+		array(
+			'response' => $error_key,
+			'back_link' => true,
+		)
+	);
+}
+
+/**
+ * 拣选数组键/值/对
+ * $array array 来源数组
+ * $pick_key_array 需要从 $array 拣选的键组成的数组
+ * $return_type 返回的类型, 支持键/值/键值对
+ * 试验中...
+ */
+function pick_array($array, $pick_key_array, $return_type = NULL) {
+	extract($array, EXTR_SKIP);
+	$array = compact($pick_key_array);
+	if ($return_type && in_array($return_type, ['key', 'keys'])) {
+		$array = array_keys($array);
+	}
+	if ($return_type && in_array($return_type, ['val', 'value', 'values'])) {
+		$array = array_values($array);
+	}
+	return $array;
+}
+
+/**** Tool END ****/
 ?>
