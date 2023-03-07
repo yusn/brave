@@ -162,13 +162,14 @@ add_filter('nav_menu_item_id', 'clear_brave_nav_menu_item_id', 10, 3);
 
 // 查询过滤
 function exclude_brave_post_from_query($query) {
+	$query_config_array = get_brave_config('query');
 	// 首页排除的格式
 	if ($query->is_main_query() && $query->is_home()) {
 		$home_tax_query = array(
 			array(
 				'taxonomy' => 'post_format',
 				'field' => 'slug',
-				'terms' => get_brave_config('query', 'home.terms_not_in'),
+				'terms' => get_array_key($query_config_array, 'home.terms_not_in'),
 				'operator' => 'NOT IN',
 			)
 		);
@@ -181,7 +182,7 @@ function exclude_brave_post_from_query($query) {
 			array(
 				'taxonomy' => 'post_format',
 				'field' => 'slug',
-				'terms' => get_brave_config('query', 'feed.terms_not_in'),
+				'terms' => get_array_key($query_config_array, 'feed.terms_not_in'),
 				'operator' => 'NOT IN'
 			)
 		);
@@ -213,11 +214,12 @@ function format_brave_title($title, $sep) {
 	if (is_feed()) {
 		return $title;
 	}
+	$basic_config_array = get_brave_config('basic');
 	// Add the site name.
-	$title .= get_bloginfo('name', 'display');
+	$title .= $basic_config_array['site_name'];;
 
 	// Add the site description for home/front page.
-	$site_description = get_bloginfo('description', 'display');
+	$site_description = $basic_config_array['site_description'];
 	if ($site_description && (is_home() || is_front_page()))
 		$title = $title . ' ' . $sep . ' ' . $site_description;
 

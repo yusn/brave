@@ -10,8 +10,9 @@ class Config {
 			'basic' => array(
 				'excerpt_length' => 200, // 摘要的长度
 				'display_ad' => false, // boolean 广告控制 true 显示广告, false 不显示
-				'home_url' => home_url('/'),
+				'home_url' => get_bloginfo('url'),
 				'site_name' => get_bloginfo('name'),
+				'site_description' => get_bloginfo('description'),
 				'time_zone' => timezone_open(get_option('timezone_string')), // timezone 时区
 				'asset_uri' => get_stylesheet_directory_uri() . '/assets', // css, js 文件路径
 				'logo' => '', // logo url 填入 logo url 将覆盖默认的图标

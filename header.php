@@ -74,7 +74,7 @@ if ( is_singular() && pings_open() ) {
 	<meta property="og:type" content="website" />
 	<meta property="og:title" content="<?php wp_title( '-', true, 'right' ); ?>" />
 	<?php if ( is_home() ) { ?>
-		<meta property="og:url" content="<?php echo esc_url( home_url() ); ?>" />
+		<meta property="og:url" content="<?php echo $home_url; ?>" />
 	<?php } else { ?>
 		<meta property="og:url" content="<?php echo esc_url( get_permalink() ); ?>" />
 	<?php } ?>
