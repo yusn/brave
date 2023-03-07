@@ -26,7 +26,7 @@
 下载安装包，解压放至 WordPress 主题目录，启用即可。
 
 ### 修改配置
-打开主题目录中 conf 目录下的 config.php 文件，所有的可修改配置均放在此文件的 get_brave_info() 函数内的 $config_array 数组里。
+打开主题目录 conf 文件夹下的 config.php 文件，所有可修改的配置项均放在此文件的 $this->config_array 后面的 array 数组里，基本每项配置都有说明。
 
 ### 使用许可
 本主题采用 [GPL-3.0 license](https://github.com/yusn/Brave/blob/main/LICENSE.md) 开源协议许可。

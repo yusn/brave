@@ -11,7 +11,7 @@ class Config {
 			'basic' => array(
 				'excerpt_length' => 200, // 摘要的长度
 				'display_ad' => false, // boolean 广告控制 true 显示广告, false 不显示
-				'home_url' => get_bloginfo('url'),
+				'home_url' => get_bloginfo('url'), // get_bloginfo 请参照 https://developer.wordpress.org/reference/functions/get_bloginfo/
 				'site_name' => get_bloginfo('name'),
 				'site_description' => get_bloginfo('description'),
 				'time_zone' => timezone_open(get_option('timezone_string')), // timezone 时区
@@ -101,7 +101,7 @@ class Config {
 			// 评论控制参数 评论对象, 指依据评论者的 email 和 IP 确定的评论发起人, 下称评论对象或该对象
 			'comment' => array(
 				'check' => true, // boolean 是否启用评论控制
-				'comment_check_key' => 'BRAVE', // string 用于校验评论来源是否合法的(可自定义, 生成md5 hash 使用)
+				'comment_check_key' => 'BRAVE', // string 用于校验评论来源是否合法的(可自定义, 透明值无关紧要, 生成md5 hash 使用)
 				'form_action_dir' => home_url(''), // 评论处理文件所在的目录
 				'comment_channel_field' => 'comment_channel', // 用于标记评论来源的字段, 这个字段对用户是透明的, 防止直接走 wp-comments-post.php
 				'IP' => '1 day ago', // 根据 IP 控制异常评论的开始时间范围: 自当前时间按此值倒退(-1 day 等同于 1 day ago)
