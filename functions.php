@@ -1008,12 +1008,10 @@ function set_brave_comment_device_meta($comment_ID) {
 				$device_ver = $detect->version('Safari');
 			}
 		}
-		$current_comment_device_name = $device_name;
-		$current_comment_device_ver = $device_ver;
 
-		if (!empty($current_comment_device_name)) {
-			add_comment_meta($comment_ID, 'comment_device_name', $current_comment_device_name);
-			add_comment_meta($comment_ID, 'comment_device_ver', $current_comment_device_ver);
+		if (!empty($device_name)) {
+			add_comment_meta($comment_ID, 'comment_device_name', $device_name);
+			add_comment_meta($comment_ID, 'comment_device_ver', $device_ver);
 		}
 	} else {
 		return;
