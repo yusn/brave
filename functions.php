@@ -639,7 +639,7 @@ function check_brave_comment($check_key, $check_key_value) {
 	}
 
 	/* case 3: 判断指定时期内是否有过多评论
-	 * 已通过审核的 email 指定时期内的评论超过 $threshold 配置的阈值, 后续评论将被标记为待审核, 若继续添加评论最终将会进入 case 2 已被阻止告终.
+	 * 已通过审核的 email 指定时期内的评论超过 $threshold 配置的阈值, 后续评论将被标记为待审核, 若继续添加评论最终将会进入 case 2 以被阻止告终
 	**/
 	$comment_status = 'approve';
 	$comment_status_array = array($comment_status); // 已通过
