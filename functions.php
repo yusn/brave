@@ -1031,9 +1031,8 @@ function modify_brave_comment_approved($approved, $commentdata) {
 }
 
 /**
- * 发布时自动置为私密
+ * 指定格式的日志, 发布时自动置为私密
  * $postarr['ID'] 获取 post_id
- * add_filter 中的第4个参数用于指定给 auto_brave_private_post_format 函数传几个参数
 */
 function auto_private_brave_post_format($data, $postarr) {
 	$format = get_post_format($postarr['ID']);
@@ -1044,7 +1043,7 @@ function auto_private_brave_post_format($data, $postarr) {
 	return $data;
 }
 
-add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 10, 2);
+add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 12, 2);
 
 /**
  * 异常评论错误提示
