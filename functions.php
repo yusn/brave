@@ -284,11 +284,6 @@ function set_brave_excerpt_length($length) {
 
 add_filter('excerpt_length', 'set_brave_excerpt_length', 999);
 
-// Require gallery.php
-if (get_post_format() === 'gallery') {
-	require_once(get_template_directory() . '/plugin/gallery.php');
-}
-
 // 非管理员界面动作
 if (!is_admin()) {
 	// Remove mediaelement
@@ -615,32 +610,32 @@ function brave_comment($comment, $args, $depth) {
 
 /**
  * 检测异常评论
- * $check_key_word String 需要根据此条件来检测异常评论,目前支持 email 或 IP
- * $check_key_word_value String 条件值,即 email 或 IP 的值
+ * $check_key String 需要根据此条件来检测异常评论,目前支持 email 或 IP
+ * $check_key_value String 条件值,即 email 或 IP 的值
  * @return Error Null
  */
-function check_brave_comment($check_key_word, $check_key_word_value) {
+function check_brave_comment($check_key, $check_key_value) {
 	// 评论控制阈值参数数组
-	$thresholdArray = get_brave_config('comment', 'threshold');
+	$threshold_array = get_brave_config('comment', 'threshold');
 
 	/* case 1: 判断是否有垃圾评论: 评论对象存在一条垃圾评论或被移动回收站的评论即不允许继续提交评论 */
 	$comment_status = 'spam';
 	$comment_status_array = array($comment_status, 'trash'); // 垃圾评论 或 已移到回收站
 	// 获取评论条数
-	$count_spam = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
-	$threshold = get_array_key($thresholdArray, $comment_status);
+	$count_spam = get_brave_comment_info($check_key, $comment_status_array, $check_key_value);
+	$threshold = get_array_key($threshold_array, $comment_status);
 	if ($count_spam >= $threshold) {
-		return get_brave_comment_error_msg($comment_status, $check_key_word, $count_spam);
+		return get_brave_comment_error_msg($comment_status, $check_key, $count_spam);
 	}
 
 	/* case 2: 判断是否有待审核评论: 超过3条待审核的评论将不允许继续提交评论 */
 	$comment_status = 'hold';
 	$comment_status_array = array($comment_status); // 待审核
 	// 获取评论条数
-	$count_hold = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
-	$threshold = get_array_key($thresholdArray, $comment_status);
+	$count_hold = get_brave_comment_info($check_key, $comment_status_array, $check_key_value);
+	$threshold = get_array_key($threshold_array, $comment_status);
 	if ($count_hold >= $threshold) {
-		return get_brave_comment_error_msg($comment_status, $check_key_word, $count_hold);
+		return get_brave_comment_error_msg($comment_status, $check_key, $count_hold);
 	}
 
 	/* case 3: 判断指定时期内是否有过多评论
@@ -648,8 +643,8 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 	**/
 	$comment_status = 'approve';
 	$comment_status_array = array($comment_status); // 已通过
-	$count_approve = get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value);
-	$threshold = get_array_key($thresholdArray, $comment_status);
+	$count_approve = get_brave_comment_info($check_key, $comment_status_array, $check_key_value);
+	$threshold = get_array_key($threshold_array, $comment_status);
 	if ($count_approve >= $threshold) {
 		return add_action('pre_comment_approved', 'modify_brave_comment_approved', 99, 2);
 	}
@@ -657,19 +652,19 @@ function check_brave_comment($check_key_word, $check_key_word_value) {
 
 /**
  * 获取评论条数
- * $check_key_word String 根据此条件统计评论数量, 如 Email 或 IP
+ * $check_key String 根据此条件统计评论数量, 如 Email 或 IP
  * $comment_status_array Array 需要统计的评论状态
- * $check_key_word_value $check_key_word 的条件值
+ * $check_key_value $check_key 的条件值
  * @return int
  */
-function get_brave_comment_info($check_key_word, $comment_status_array, $check_key_word_value) {
+function get_brave_comment_info($check_key, $comment_status_array, $check_key_value) {
 	
 	// 获取评论配置
 	$comment_config_array = get_brave_config('comment');
 	
 	// 根据 email 查询是否有异常评论
-	if ($check_key_word === 'email') {
-		$comment_email = $check_key_word_value;
+	if ($check_key === 'email') {
+		$comment_email = $check_key_value;
 		$comment_field_array = array(
 			'count' => true, // 返回评论条数
 			'status' => $comment_status_array, // 评论状态:['spam,'trash']/['hold']
@@ -698,8 +693,8 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 	}
 
 	// 根据 IP 查询是否有异常评论
-	if ($check_key_word === 'IP') {
-		$comment_IP = $check_key_word_value;
+	if ($check_key === 'IP') {
+		$comment_IP = $check_key_value;
 		/* 置换 $comment_status_array 为 sql 条件 开始 */
 		$status_convert_array = get_array_key($comment_config_array, 'comment_status_convert_array');
 		$count_status = count($comment_status_array);
@@ -713,7 +708,7 @@ function get_brave_comment_info($check_key_word, $comment_status_array, $check_k
 		/* 置换 $comment_status_array 为 sql 条件 结束 */
 
 		// 获取查询开始时间
-		$interval = get_array_key($comment_config_array, $check_key_word);
+		$interval = get_array_key($comment_config_array, $check_key);
 		$comment_approved_time = get_brave_date_string('now', $interval);
 
 		// 区别: comment_date 系统设置的时区时间, comment_date_gmt 格林尼治时间
@@ -750,7 +745,7 @@ function add_brave_comment_at($comment_text, $comment = '') {
 add_filter('comment_text', 'add_brave_comment_at', 20, 2);
 
 /**
- * 上传文件自动在文件名后面附件随机字符串 (为了安全)
+ * 上传文件自动在文件名后面附加随机字符串 (为了安全)
  * https://developer.wordpress.org/reference/hooks/sanitize_file_name/
 */
 function make_brave_filename_hash($filename) {
@@ -766,20 +761,9 @@ function make_brave_filename_hash($filename) {
 add_filter('sanitize_file_name', 'make_brave_filename_hash');
 
 /**
- * 获取散列值
- * $group string
- * $item string
- * $user_hash string
- * @return boolean 校验通过返回 true;否则,返回 false
-*/
-function get_brave_secure_auth($group, $item) {
-	return wp_hash( get_brave_config($group, $item) );
-
-}
-
-/**
  * 校验散列值
- * $user_hash string
+ * $sys_hash string 系统生成的散列值
+ * $user_hash string 用户传入的散列值
  * @return boolean 校验通过返回 true; 否则, 返回 false
 */
 function check_brave_secure_auth($sys_hash, $user_hash) {
@@ -892,9 +876,11 @@ if (!is_user_logged_in()) {
 
 /**
  * 正则替换
- * $val | $key 通过 array_walk 传入的 value 和 key 对
- * $args array 第一个元素为模式数组, 第二个元素为过滤 $key 的数组 (仅处理包含于其中的 $key)
- * $pattern_array array 两个元素的数组, 第一个元素为模式, 第二个元素为替换字符串: https://www.php.net/manual/zh/function.preg-replace.php
+ * $date string|array 需要搜索替换的原始数据
+ * $pattern_array array 模式数组
+ * $replacement_array array 替换数组
+ * @return string|array 取决于 $date 的类型
+ * preg_replace https://www.php.net/manual/zh/function.preg-replace.php
  */
 function get_brave_replace(&$data, $pattern_array, $replacement_array) {
 	$data = preg_replace($pattern_array, $replacement_array, $data);
@@ -1134,6 +1120,9 @@ function get_brave_config($group, $item = NULL) {
 	return empty($item) ? $group_array : get_array_key($group_array, $item);
 }
 
+
+/**** 加载插件 START ****/
+
 // 加载 Mobile_Detect 插件
 include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
 
@@ -1142,6 +1131,12 @@ include_once(get_template_directory() . '/plugin/like.php');
 
 // 加载广告配置
 include_once(get_template_directory() . '/plugin/display_ad.php');
+
+// Require gallery.php
+require_once(get_template_directory() . '/plugin/gallery.php');
+
+/**** 加载插件 END ****/
+
 
 /**** Tool START ****/
 
@@ -1154,6 +1149,21 @@ function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
 	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 16) : abs($hash_length);
 	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 	return substr(str_shuffle($hash_mask), -$hash_length);
+}
+
+/**
+ * 获取散列值
+ * $group string
+ * $item string 通过 $group 和 $item 获取对应配置中的字符串
+ * $user_hash string
+ * $schema string 可选, 默认使用 wp_config.php 配置的 AUTH_KEY 或 AUTH_SALT
+ * @return boolean 校验通过返回 true; 否则,返回 false
+ * 
+ * wp_hash https://developer.wordpress.org/reference/functions/wp_hash/
+ * wp_salt https://developer.wordpress.org/reference/functions/wp_salt/
+*/
+function get_brave_secure_auth($group, $item, $scheme = 'auth') {
+	return wp_hash(get_brave_config($group, $item), $scheme);
 }
 
 /**
