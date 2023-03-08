@@ -611,14 +611,14 @@ function brave_comment($comment, $args, $depth) {
 /**
  * 检测异常评论
  * $check_key String 需要根据此条件来检测异常评论,目前支持 email 或 IP
- * $check_key_value String 条件值,即 email 或 IP 的值
+ * $check_key_value String check_key 的条件值, 即 email 或 IP 的值
  * @return Error Null
  */
 function check_brave_comment($check_key, $check_key_value) {
 	// 评论控制阈值参数数组
 	$threshold_array = get_brave_config('comment', 'threshold');
 
-	/* case 1: 判断是否有垃圾评论: 评论对象存在一条垃圾评论或被移动回收站的评论即不允许继续提交评论 */
+	/* case 1: 判断是否有垃圾评论: 评论对象存在的垃圾评论或已被移到回收站的评论数量超过 $threshold 配置的阈值, 即不再允许继续提交评论 */
 	$comment_status = 'spam';
 	$comment_status_array = array($comment_status, 'trash'); // 垃圾评论 或 已移到回收站
 	// 获取评论条数
@@ -628,7 +628,7 @@ function check_brave_comment($check_key, $check_key_value) {
 		return get_brave_comment_error_msg($comment_status, $check_key, $count_spam);
 	}
 
-	/* case 2: 判断是否有待审核评论: 超过3条待审核的评论将不允许继续提交评论 */
+	/* case 2: 判断是否有待审核评论: 待审核评论数超过 $threshold 配置的阈值将不允许继续提交评论 */
 	$comment_status = 'hold';
 	$comment_status_array = array($comment_status); // 待审核
 	// 获取评论条数
@@ -639,7 +639,7 @@ function check_brave_comment($check_key, $check_key_value) {
 	}
 
 	/* case 3: 判断指定时期内是否有过多评论
-	 * 已通过审核的 email 指定时期内的评论超过限制数量, 后续评论将被标记为待审核, 最终会进入 case 2 被阻止.
+	 * 已通过审核的 email 指定时期内的评论超过 $threshold 配置的阈值, 后续评论将被标记为待审核, 若继续添加评论最终将会进入 case 2 已被阻止告终.
 	**/
 	$comment_status = 'approve';
 	$comment_status_array = array($comment_status); // 已通过
