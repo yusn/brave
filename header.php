@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
-<?php list('asset_uri' => $asset_uri, 'site_name' => $site_name, 'home_url' => $home_url, 'logo' => $logo) = get_brave_config('basic'); ?>
+<?php extract(pick_array(get_brave_config('basic'), ['asset_uri', 'site_name', 'home_url', 'logo'])); ?>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
 <link rel="profile" href="//gmpg.org/xfn/11" />
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'/>

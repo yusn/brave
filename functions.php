@@ -1240,18 +1240,22 @@ function get_brave_die($error_key, $error_val, $title = NULL) {
 /**
  * 拣选数组键/值/对
  * $array array 来源数组
- * $pick_key_array 需要从 $array 拣选的键组成的数组
- * $return_type 返回的类型, 支持键/值/键值对
+ * $pick_key_array 需要拣选的 $array 的键或索引, 如: ['a', 'b'] / [0, 1]
+ * $return_type string 拣选目标, 支持对 键/值/键值对 的拣选
+ * return array
  * 试验中...
  */
 function pick_array($array, $pick_key_array, $return_type = NULL) {
+	// 移除 $pick_key_array 里不存在于 $array 的值
+	$pick_key_array = array_filter($pick_key_array, function ($val) use ($array) {
+		return array_key_exists($val, $array);
+	});
 	extract($array, EXTR_SKIP);
 	$array = compact($pick_key_array);
-	if ($return_type && in_array($return_type, ['key', 'keys'])) {
-		$array = array_keys($array);
-	}
-	if ($return_type && in_array($return_type, ['val', 'value', 'values'])) {
-		$array = array_values($array);
+	if (is_string($return_type)) {
+		$key_array = ['k', 'key', 'keys'];
+		$val_array = ['v', 'val', 'value', 'values'];
+		return in_array($return_type, $key_array) ? array_keys($array) : (in_array($return_type, $val_array) ? array_values($array) : []);
 	}
 	return $array;
 }

@@ -3,7 +3,8 @@
 	<div class="footerin clear">
 		<div class="f-name">
 			<?php 
-				list('logo' => $logo, 'beian' => $beian) = get_brave_config('basic');
+				// 获取变量 $logo, $beian
+				extract(pick_array(get_brave_config('basic'), ['logo', 'beian']));
 				if (!empty($logo)) :
 			?>
 				<a id="logo" href="/" title="<?php get_bloginfo('name'); ?>">
