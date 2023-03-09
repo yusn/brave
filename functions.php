@@ -369,8 +369,8 @@ function get_brave_year_of_age($birth_date) {
 	echo $prefix . $result;
 }
 
-function get_brave_age() {
-	$format = get_post_format();
+function get_brave_age($format = NULL) {
+	$format = empty($format) ? get_post_format() : $format;
 	$key = get_brave_config('custom', 'date.' . $format);
 	$date = date_create($key); // 转换成日期格式
 	return isset($key) ? get_brave_year_of_age($date) : '';
@@ -399,7 +399,7 @@ function get_brave_search_date() {
 	$format = get_post_format();
 	$role = get_brave_config('custom', 'role.' . $format);
 	if (!empty($role)) {
-		return get_brave_age();
+		return get_brave_age($format);
 	} else {
 		return the_time(__('Y-m-d', 'brave'));
 	}
