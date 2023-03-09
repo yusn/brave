@@ -646,7 +646,7 @@ function check_brave_comment($check_key, $check_key_value) {
 	$count_approve = get_brave_comment_info($check_key, $comment_status_array, $check_key_value);
 	$threshold = get_array_key($threshold_array, $comment_status);
 	if ($count_approve >= $threshold) {
-		return add_action('pre_comment_approved', 'modify_brave_comment_approved', 99, 2);
+		return add_action('pre_comment_approved', 'modify_brave_comment_to_approved', 99, 2);
 	}
 }
 
@@ -1026,7 +1026,7 @@ add_action('wp_insert_comment', 'set_brave_comment_device_meta', 10, 1);
  * $approved int|string|WP_Error
  * $commentdata array
  */
-function modify_brave_comment_approved($approved, $commentdata) {
+function modify_brave_comment_to_approved($approved, $commentdata) {
 	return $approved = 0;
 }
 
