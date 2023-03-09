@@ -65,9 +65,9 @@ if ( is_singular() && pings_open() ) {
 	<?php
 		if ( has_post_thumbnail() ) {
 			$sight_image = wp_get_attachment_image_src( get_post_thumbnail_id(), 'medium' ); 
-			echo '<meta property="og:image" content="'. esc_attr( $sight_image[0] ) .'" />';
+			echo '<meta property="og:image" content="' . esc_attr( $sight_image[0] ) . '" />';
 		} else {
-			echo'<meta property="og:image" content="<?php echo $asset_uri; ?>/app-touch-icon.png" />';
+			echo '<meta property="og:image" content="' . $asset_uri . '/app-touch-icon.png" />';
 		}
 	?>
 <?php } elseif ( is_page() || is_archive() ) { ?>
