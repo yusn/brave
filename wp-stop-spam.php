@@ -37,8 +37,8 @@ require_once(__ROOT__ . '/wp-load.php');
 // 检查是否开启评论控制
 $is_check = false;
 if (function_exists('get_brave_config')) {
-	$brave_config_array = get_brave_config('comment');
-	$is_check = $brave_config_array['check'];
+	$comment_config_array = get_brave_config('comment');
+	$is_check = $comment_config_array['check'];
 }
 
 if ($is_check) {
@@ -50,7 +50,7 @@ if ($is_check) {
 	
 	// step.1: 默认评论字段必须为空, 且不能存在 comment_channel
 	$comment = trim(get_array_key($_POST, 'comment'));
-	$comment_channel_field = $brave_config_array['comment_channel_field'];
+	$comment_channel_field = $comment_config_array['comment_channel_field'];
 	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
 	if (!empty($comment) || $has_comment_channel) {
 		return get_brave_error_msg('channel_error'); // 评论来源异常
