@@ -1139,11 +1139,11 @@ require_once(get_template_directory() . '/plugin/gallery.php');
 
 /**
  * 生成随机字符串
- * $hash_length int 想要的随机字符串长度 低于4位会自动重置为 8 - 16 的随机长度
+ * $hash_length int 想要的随机字符串长度 低于 8 位会自动重置为 12 - 18 的随机长度
  * $hash_mask string 随机字符串的来源
  */
 function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
-	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 4)) ? rand(8, 16) : abs($hash_length);
+	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 8)) ? rand(12, 18) : abs($hash_length);
 	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 	return substr(str_shuffle($hash_mask), -$hash_length);
 }
@@ -1152,15 +1152,14 @@ function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
  * 获取散列值
  * $group string
  * $item string 通过 $group 和 $item 获取对应配置中的字符串
- * $user_hash string
  * $schema string 可选, 默认使用 wp_config.php 配置的 AUTH_KEY 或 AUTH_SALT
  * @return boolean 校验通过返回 true; 否则,返回 false
  * 
  * wp_hash https://developer.wordpress.org/reference/functions/wp_hash/
  * wp_salt https://developer.wordpress.org/reference/functions/wp_salt/
 */
-function get_brave_secure_auth($group, $item, $scheme = 'auth') {
-	return wp_hash(get_brave_config($group, $item), $scheme);
+function get_brave_secure_auth($group, $item, $schema = 'auth') {
+	return wp_hash(get_brave_config($group, $item), $schema);
 }
 
 /**
