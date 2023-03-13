@@ -749,12 +749,19 @@ add_filter('comment_text', 'add_brave_comment_at', 20, 2);
  * https://developer.wordpress.org/reference/hooks/sanitize_file_name/
 */
 function auto_brave_filename_hash($filename) {
+	// 修复通过 wordPress APP 上传图片两次附加随机字符串的问题, mw_newMediaObject 会多调用一次 sanitize_file_name
+	static $cache = [];
+	if (isset($cache[$filename])) {
+		return $filename;
+	};
 	$path_array = pathinfo($filename);
 	$file_ext = empty($path_array['extension']) ? '' : '.' . $path_array['extension'];
 	$base_name = basename($filename, $file_ext);
 	$hash_length = rand(8, 16);
 	$hash_string = get_brave_hash($hash_length);
-	return $base_name . '_' . $hash_string . $file_ext;
+	$filename = $base_name . '_' . $hash_string . $file_ext;
+	$cache[$filename] = 1;
+	return $filename;
 }
 
 add_filter('sanitize_file_name', 'auto_brave_filename_hash');
@@ -922,8 +929,9 @@ if (get_brave_config('basic', 'auto_space')) {
 
 // 发布日志时保存发布者的设备信息
 function set_brave_post_device_meta($post_id, $post, $update) {
-	// 更新操作不处理, 自动保存不处理
-	if ($update || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
+	$current_meta = get_post_meta($post_id, 'post_device_name', true);
+	// 更新操作不处理, 自动保存不处理, $update 不可靠
+	if (!empty($current_meta) || $update || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
 		return;
 	}
 	
@@ -963,8 +971,8 @@ function set_brave_post_device_meta($post_id, $post, $update) {
 	}
 	
 	if (!empty($device_name)) {
-		update_post_meta($post_id, 'post_device_name', $device_name);
-		update_post_meta($post_id, 'post_device_ver', $device_ver);
+		add_post_meta($post_id, 'post_device_name', $device_name);
+		add_post_meta($post_id, 'post_device_ver', $device_ver);
 	}
 }
 
