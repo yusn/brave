@@ -748,17 +748,16 @@ add_filter('comment_text', 'add_brave_comment_at', 20, 2);
  * 上传文件自动在文件名后面附加随机字符串 (为了安全)
  * https://developer.wordpress.org/reference/hooks/sanitize_file_name/
 */
-function make_brave_filename_hash($filename) {
-	$info = pathinfo($filename);
-	$ext = empty($info['extension']) ? '' : '.' . $info['extension'];
-	$name = basename($filename, $ext);
+function auto_brave_filename_hash($filename) {
+	$path_array = pathinfo($filename);
+	$file_ext = empty($path_array['extension']) ? '' : '.' . $path_array['extension'];
+	$base_name = basename($filename, $file_ext);
 	$hash_length = rand(8, 16);
 	$hash_string = get_brave_hash($hash_length);
-	$filename = $name . '_' . $hash_string . $ext;
-	return $filename;
+	return $base_name . '_' . $hash_string . $file_ext;
 }
 
-add_filter('sanitize_file_name', 'make_brave_filename_hash');
+add_filter('sanitize_file_name', 'auto_brave_filename_hash');
 
 /**
  * 校验散列值
@@ -1139,11 +1138,11 @@ require_once(get_template_directory() . '/plugin/gallery.php');
 
 /**
  * 生成随机字符串
- * $hash_length int 想要的随机字符串长度 低于 8 位会自动重置为 12 - 18 的随机长度
+ * $hash_length int 想要的随机字符串长度 低于 8 位会自动重置为 8 - 18 的随机长度
  * $hash_mask string 随机字符串的来源
  */
 function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
-	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 8)) ? rand(12, 18) : abs($hash_length);
+	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 8)) ? rand(8, 18) : abs($hash_length);
 	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 	return substr(str_shuffle($hash_mask), -$hash_length);
 }
