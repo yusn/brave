@@ -436,36 +436,31 @@ function get_brave_excerpt($length = NULL) {
 function get_brave_post_meta() {
 	global $post;
 	// 坐标
-	$meta_geo_lat = get_post_meta($post->ID, 'geo_latitude', true);
-	$meta_geo_lon = get_post_meta($post->ID, 'geo_longitude', true);
-	$meta_geo_city = get_post_meta($post->ID, 'geo_city', true); // 城市
-	$meta_geo_public = get_post_meta($post->ID, 'geo_public', true); // 坐标公开状态：1公开/0私有
-	$meta_wx_wx = get_post_meta($post->ID, 'wx_weather', true);
-	$meta_wx_temp = get_post_meta($post->ID, 'wx_temp', true); // 温度
+	$group = get_post_meta($post->ID);
+	// 维度, 经度, 城市, 坐标公开状态(1公开,0不公开),天气, 温度
+	$group = pick_array($group, ['geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp']);
+	array_map(function($key, $val) use (&$group) {$group[$key] = $val[0];}, array_keys($group), array_values($group));
+	extract($group, EXTR_SKIP);
 
 	$html_string = '';
-
-	if ($meta_geo_lat && $meta_geo_lon) {
-		if ($meta_geo_public === 1) {
-			$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$meta_geo_lat,$meta_geo_lon&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="i-local"></span></a></span>';
-			if ($meta_geo_city) {
-				$html_string .= '<span>' . $meta_geo_city . '</span>';
+	if (isset($geo_latitude) && isset($geo_longitude) && isset($geo_public)) {
+		$local = $geo_public === '1' ? 'i-local' : 'i-pin';
+		if ($geo_public === '1' || current_user_can('manage_options')) {
+			$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+			if (isset($geo_city)) {
+				$html_string .= '<span> ' . $geo_city . '</span>';
 			}
-		} elseif ($meta_geo_public === 0) {
-			if (current_user_can('manage_options')) {
-				$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$meta_geo_lat,$meta_geo_lon&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="i-pin"></span></a></span>';
-			} else {
-				$html_string .= '<span class="i-pin ml" itemprop="map" itemtype="//schema.org/Place"></span>';
-			}
+		} elseif ($geo_public === '0') {
+				$html_string .= '<span class="' . $local . ' ml" itemprop="map" itemtype="//schema.org/Place"></span>';
 		}
 	}
 	// 天气
-	if ($meta_wx_wx) {
-		$html_string .= '<span class="ml">' . $meta_wx_wx . '</span>';
+	if (isset($wx_weather)) {
+		$html_string .= '<span class="ml">' . $wx_weather . '</span>';
 	}
 	// 温度
-	if ($meta_wx_temp) {
-		$html_string .= '<span class="ml">' . $meta_wx_temp . '</span>';
+	if (isset($wx_temp)) {
+		$html_string .= '<span class="ml">' . $wx_temp . '</span>';
 	}
 
 	if ($html_string) {
