@@ -126,9 +126,9 @@ li,.comment,.lsn{list-style:none}
 .avatar{width:48px;height:48px}
 .children .avatar{width:38px;height:38px;margin-right:10px}
 .leave-reply{margin-left:6px}
-.little_star{height:120px;line-height:24px;margin:6px 0 16px;resize:vertical}
-#toggle,.little_star{padding:8px;-webkit-tap-highlight-color:transparent}
-.little_star,.s-text,.inp{box-sizing:border-box}
+.real-comment{height:120px;line-height:24px;margin:6px 0 16px;resize:vertical}
+#toggle,.real-comment{padding:8px;-webkit-tap-highlight-color:transparent}
+.real-comment,.s-text,.inp{box-sizing:border-box}
 .inp,a:hover,.btn{transition:all .2s ease 0s}
 .inp{box-shadow:0 0 3px rgba(0,0,0,0.05) inset}
 .inp:focus{border:1px solid #ddd;border:var(--dark-solid,1px solid #ddd);background:#fff;background:var(--background-input-focus);box-shadow:0 0 4px rgba(0,0,0,0.12) inset}
@@ -186,7 +186,7 @@ rt{font-size:.75rem}
 .s-text{height:40px;transition:all .2s ease-in-out 0s}
 .egret,.lark,.owl,.leo{padding-top:64px}
 .egret,.lark,.owl,.leo,.archive-list,.bp{margin-left:auto;margin-right:auto}
-.little_star{width:640px}
+.real-comment{width:640px}
 .fat{padding:24px}
 .bp h1,.bp h2,.bp h3,.bp h4,.bp h5,.bp h6,.bp ol,.bp ul,.bp p,.bp blockquote,.bp pre,.fat-meta,.bp .wp-caption-text{margin-left:80px;margin-right:80px}
 .bp li p,.bp li h3,.bp li h4,.bp li h5,.bp li pre,.bp blockquote p,.bp blockquote ol,.bp blockquote ul{margin-left:0;margin-right:0}
@@ -220,10 +220,10 @@ rt{font-size:.75rem}
 .footer{padding:24px 0}
 .site-name,.f-items{float:left}
 .searchbox{float:none}
-.little_star,.f-name,.s-text,.cmt-input,.site-title{width:100%}
+.real-comment,.f-name,.s-text,.cmt-input,.site-title{width:100%}
 .bp{padding-left:30px;padding-right:30px}
 .fat{padding:24px}
-.little_star{height:118px}
+.real-comment{height:118px}
 }
 @media screen and (max-width:719px) {
 .site-name{margin-left:8px}

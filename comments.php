@@ -15,10 +15,10 @@ if ( post_password_required() ) {
 			'fields'  => array(
 				'author'  => '<p class="commentform"><input type="text" name="author" id="author" class="inp cmt-input" placeholder="昵称[必填]" aria-required="true" size="30" value="' . esc_attr( $commenter['comment_author'] ) . '"></p>',
 				'email'   => '<p class="commentform"><input type="text" name="email" id="email" class="inp cmt-input" placeholder="邮箱[必填·保密]" aria-required="true" size="30" value="' . esc_attr( $commenter['comment_author_email'] ) . '"></p>',
-				'url'     => '<p class="commentform"><input type="text" name="url" id="url" class="inp cmt-input" placeholder="网址[选填]" size="30" value="'.$comment_author_url.'"></p>',
-				'cookies' => '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . $consent . '/>' . '<label for="wp-comment-cookies-consent" class="c4">记住我的个人信息</label></p>',
+				'url'     => '<p class="commentform"><input type="text" name="url" id="url" class="inp cmt-input" placeholder="网址[选填]" size="30" value="' . $comment_author_url . '"></p>',
+				'cookies' => '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . $consent . '/><label for="wp-comment-cookies-consent" class="c4">记住我的个人信息</label></p>',
 			),
-			'comment_field' 	   => '<textarea id="comment" name="comment"></textarea><textarea name= ' . '"' .$comment_text_field . '"' . ' class="little_star inp text-bg comment-textarea" placeholder="添加评论..." aria-required="true" cols="45" rows="8"></textarea>',
+			'comment_field' 	   => '<textarea name="' . $comment_text_field . '" class="real-comment inp text-bg comment-textarea" placeholder="添加评论..." aria-required="true" cols="45" rows="8"></textarea>',
 			'title_reply'   	   => '发表评论',
 			'cancel_reply_link'    => '取消回复',
 			'label_submit' 		   => '发表评论',
