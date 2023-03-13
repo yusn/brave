@@ -301,7 +301,7 @@ if (!is_admin()) {
 	add_filter('wp_video_shortcode_library', 'remove_brave_mediaelement');
 
 	// read more
-	function customize_brave_excerpt_more($more) {
+	function custom_brave_excerpt_more($more) {
 		$link = sprintf('<div class="more-link mt20"><a href="%1$s">%2$s</a></div>',
 			esc_url(get_permalink(get_the_ID())),
 			sprintf(__('Read more %s', 'brave'), '<span class="none">' . esc_html(get_the_title(get_the_ID())) . '</span>')
@@ -309,7 +309,7 @@ if (!is_admin()) {
 		return ' &hellip; ' . $link;
 	}
 
-	add_filter('excerpt_more', 'customize_brave_excerpt_more');
+	add_filter('excerpt_more', 'custom_brave_excerpt_more');
 }
 
 // 自定义搜索框
@@ -565,7 +565,7 @@ function modify_brave_comment_class($class) {
 
 add_filter('comment_class', 'modify_brave_comment_class');
 
-// Customize comment
+// Custom comment
 function brave_comment($comment, $args, $depth) {
 	switch ($comment->comment_type) {
 		case 'pingback' :
@@ -789,7 +789,7 @@ function send_brave_mail($subject, $body) {
 }
 
 // 自定义密码输入框
-function customize_brave_password_form() {
+function custom_brave_password_form() {
 	global $post;
 	$label = 'pwbox-' . (empty($post->ID) ? rand() : $post->ID);
 	$form_html = '<form action="' . esc_url(site_url('wp-login.php?action=postpass', 'login_post')) . '" method="post">
@@ -797,21 +797,21 @@ function customize_brave_password_form() {
 	return $form_html;
 }
 
-add_filter('the_password_form', 'customize_brave_password_form');
+add_filter('the_password_form', 'custom_brave_password_form');
 
-// Customize protected_title and private_title 
+// Custom protected_title and private_title 
 if (current_user_can('administrator')) {
-	function customize_brave_protected_title($title) {
+	function custom_brave_protected_title($title) {
 		return '<span class="i-key mr-ico"></span>%s';
 	}
 
-	add_filter('protected_title_format', 'customize_brave_protected_title');
+	add_filter('protected_title_format', 'custom_brave_protected_title');
 
-	function customize_brave_private_title($title) {
+	function custom_brave_private_title($title) {
 		return '<span class="i-lock mr-ico"></span>%s';
 	}
 
-	add_filter('private_title_format', 'customize_brave_private_title');
+	add_filter('private_title_format', 'custom_brave_private_title');
 }
 
 // 拼 sql 条件过滤加密的
