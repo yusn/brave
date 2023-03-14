@@ -743,23 +743,21 @@ add_filter('comment_text', 'add_brave_comment_at', 20, 2);
  * 上传文件自动在文件名后面附加随机字符串 (为了安全)
  * https://developer.wordpress.org/reference/hooks/sanitize_file_name/
 */
-function auto_brave_filename_hash($filename) {
+function append_brave_filename_hash($filename) {
 	// 修复通过 wordPress APP 上传图片两次附加随机字符串的问题, mw_newMediaObject 会多调用一次 sanitize_file_name
 	static $cache = [];
 	if (isset($cache[$filename])) {
 		return $filename;
 	};
-	$path_array = pathinfo($filename);
-	$file_ext = empty($path_array['extension']) ? '' : '.' . $path_array['extension'];
-	$base_name = basename($filename, $file_ext);
-	$hash_length = rand(8, 16);
-	$hash_string = get_brave_hash($hash_length);
-	$filename = $base_name . '_' . $hash_string . $file_ext;
+	$file_ext = pathinfo($filename, PATHINFO_EXTENSION);
+	$file_name = pathinfo($filename, PATHINFO_FILENAME);
+	$hash_string = get_brave_hash(rand(8, 16));
+	$filename = $file_name . '_' . $hash_string . '.' . $file_ext;
 	$cache[$filename] = 1;
 	return $filename;
 }
 
-add_filter('sanitize_file_name', 'auto_brave_filename_hash');
+add_filter('sanitize_file_name', 'append_brave_filename_hash');
 
 /**
  * 校验散列值
@@ -1169,6 +1167,7 @@ function get_brave_secure_auth($group, $item, $schema = 'auth') {
  * $array array
  * $key string | Int 数组键 或 数组索引。 支持多级键, 以.号分隔, 示例: get_array_key(array, 'key1.key2');
  * @return
+ * wp 已有类似函数 _wp_array_get 对键的使用略有不同
  */
 function get_array_key($array, $key) {
 	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
@@ -1180,7 +1179,7 @@ function get_array_key($array, $key) {
 		return array_key_exists($key, $array) ? $array[$key] : NULL;
 	}
 	
-	// 传入的是键
+	// 传入的是键 或 多级索引
 	$item_array = explode('.', $key);
 	$count_item = count($item_array);
 	for ($i = 0; $i < $count_item; $i++) {
@@ -1213,6 +1212,7 @@ function remove_array_key(&$array, $key) {
  * $array array
  * $key string
  * @return
+ * wp 有类似函数 _wp_array_set 支持多级键值设置
  */
 function set_array_key(&$array, $key, $val) {
 	$array[$key] = $val;
@@ -1244,7 +1244,7 @@ function get_brave_die($error_key, $error_val, $title = NULL) {
  * $pick_key_array 需要拣选的 $array 的键或索引, 如: ['a', 'b'] / [0, 1]
  * $return_type string 拣选目标, 支持对 键/值/键值对 的拣选
  * return array
- * 试验中...
+ * 模仿 JavaScript lodash 的 pick 方法
  */
 function pick_array($array, $pick_key_array, $return_type = NULL) {
 	// 移除 $pick_key_array 里不存在于 $array 的值
