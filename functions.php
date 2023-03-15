@@ -518,11 +518,7 @@ function get_brave_comment_device() {
 			case 'Kindle':
 			*/
 			case 'Chrome':
-				$html_string = '<span class="ml c3 f14">' . $comment_device . $comment_device_ver . '</span>';
-				break;
 			case 'Safari':
-				$html_string = '<span class="ml c3 f14">' . $comment_device . $comment_device_ver . '</span>';
-				break;
 			case 'Firefox':
 				$html_string = '<span class="ml c3 f14">' . $comment_device . $comment_device_ver . '</span>';
 				break;
