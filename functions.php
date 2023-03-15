@@ -85,11 +85,11 @@ add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
 function get_brave_config_intf() {
 	$group = sanitize_text_field($_REQUEST['group']);
 	$item = sanitize_text_field($_REQUEST['item']);
-	$response = [];
 	// 暂时只响应 asset_uri
 	if (!isset($group) || !isset($item) || $group !== 'basic' || $item !== 'asset_uri') {
 		exit();
 	}
+	$response = [];
 	$func = 'get_brave_config';
 	if (function_exists($func)) {
 		$response[$item] = $func($group, $item);
@@ -1178,12 +1178,7 @@ function get_array_key($array, $key) {
 		return;
 	}
 	
-	// 传入的是索引
-	if (is_int($key)) {
-		return array_key_exists($key, $array) ? $array[$key] : NULL;
-	}
-	
-	// 传入的是键 或 多级索引
+	// 传入的是键 或 索引
 	$item_array = explode('.', $key);
 	$count_item = count($item_array);
 	for ($i = 0; $i < $count_item; $i++) {
