@@ -922,9 +922,17 @@ if (get_brave_config('basic', 'auto_space')) {
 
 // 发布日志时保存发布者的设备信息
 function set_brave_post_device_meta($post_id, $post, $update) {
-	$current_meta = get_post_meta($post_id, 'post_device_name', true);
-	// 更新操作不处理, 自动保存不处理, $update 不可靠
-	if (!empty($current_meta) || $update || (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)) {
+	/* $update: 内容未变动, 点更新按钮为 true; 内容有改变 $update 为 false
+	 * $parent_id: wp_get_post_parent_id 要看有没使用保存版本, 有使用(内容未变更)就等于 0, 没有使用(内容有变更)大于 0
+	 * 点新建会触发 save_post, 此时生成 $post_id, wp_get_post_parent_id 返回值是 0, update 是 false
+	 * 内容为空, 点保存草稿/发布 都不会触发 save_post, 此时发布不会成功
+	 * 自动保存不会触发 save_post
+	 * 发布前点保存, 且内容有变更触发 save_post, wp_get_post_parent_id 返回当前日志 id(>0), update 为 false
+	 */
+	$parent_id = wp_get_post_parent_id($post_id);
+	// $current_meta = get_post_meta($post_id, 'post_device_name', true);
+	// 只在新建时增加设备信息
+	if ($update === true || $parent_id !== 0) {
 		return;
 	}
 	
