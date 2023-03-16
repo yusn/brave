@@ -38,7 +38,7 @@ class Config {
 				'send_mail' => array(
 					'to' => get_bloginfo('admin_email'), // 邮件接收人
 				),
-				'auto_space' => false, // boolean 启用自动空格(true 发布或更新日志将自动在汉字和单词间加空格 https://wordpress.org/plugins/space-lover/) 
+				'auto_space' => false, // boolean 是否启用自动空格(true 发布或更新日志将自动在汉字和单词间加空格)
 				'auto_space_field' => array('post_title', 'post_content', 'post_excerpt'), // array 需要自动空格的字段（目前仅限 POST、PAGE）
 			),
 			'query' => array(
@@ -51,11 +51,11 @@ class Config {
 				'home' => array(
 					'terms_not_in' => array('post-format-aside', 'post-format-status', 'post-format-chat', 'post-format-quote', 'post-format-audio', 'post-format-video', 'post-format-link'),
 				),
-				// 足迹
+				// Here 页面模板
 				'Here' => array(
 					'terms_in' => array('post-format-status'),
 				),
-				// 博客
+				// Blog 页面模板
 				'Blog' => array(
 					'terms_in' => array('post-format-aside', 'post-format-video'),
 				),
