@@ -563,7 +563,7 @@ function brave_comment($comment, $args, $depth) {
 		case 'trackback' :
 			?>
             <li id="comment-<?php comment_ID(); ?>" <?php comment_class('comment'); ?>>
-            <span class='mr12 c4 f14'><?php comment_type(); ?></span><?php comment_author_link(); ?><?php edit_comment_link(__('Edit', 'brave'), '<span class="c3 ml12 f14">', '</span>'); ?>
+            <span class='mr12 c4 f14'><?php comment_type(); ?></span><?php comment_author_link(); ?>
 			<?php
 			break;
 		default :
@@ -590,7 +590,7 @@ function brave_comment($comment, $args, $depth) {
 					<?php comment_text(); ?>
                 </div>
                 <div class="c4 f14">
-					<?php comment_reply_link(array_merge($args, array('reply_text' => __('<span class="i-reply"></span>Reply', 'brave'), 'after' => '', 'depth' => $depth, 'max_depth' => $args['max_depth']))); ?><?php edit_comment_link(__('Edit', 'brave'), '<span class="ml12 c3">', '</span>'); ?>
+					<?php comment_reply_link(array_merge($args, array('reply_text' => __('<span class="i-reply"></span>Reply', 'brave'), 'after' => '', 'depth' => $depth, 'max_depth' => $args['max_depth']))); ?>
                 </div>
             </div><!-- cm end -->
             </div>
@@ -904,7 +904,7 @@ function auto_brave_post_space($data, $postarr, $unsanitized_postarr, $update) {
 		'~(\p{Han})(<\/(?!ruby)[a-zA-Z]+>)([a-zA-Z0-9])~u',
 		'~([a-zA-Z0-9\p{Pe}\p{Pf}!?‽:;,.%])(<(?!ruby)[a-zA-Z]+?[^>]*?>)(\p{Han})~u',
 		'~([a-zA-Z0-9\p{Ps}\p{Pi}!?‽:;,.%])(<\/(?!ruby)[a-zA-Z]+>)(\p{Han})~u',
-		'~[ ]*([「」『』（）〈〉《》【】〔〕〖〗〘〙〚〛])[ ]*~u',
+		'~[ ]*([「」『』（）〈〉《》【】〔〕〖〗〘〙〚〛])[ ]*~u',
 	);
 	$replacement_array = array('\1 \2', '\1 \2', '\1 \2', '\1 \2', '\1\2', '\1 \2\3', '\1\2 \3', '\1 \2\3', '\1\2 \3', '\1',);
 	$pick_data = pick_array($data, $pick_field_array);
