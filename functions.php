@@ -437,7 +437,7 @@ function get_brave_post_meta() {
 	global $post;
 	// 坐标
 	$group = get_post_meta($post->ID);
-	// 维度, 经度, 城市, 坐标公开状态(1公开,0不公开),天气, 温度
+	// 纬度, 经度, 城市, 坐标公开状态(1公开,0不公开),天气, 温度
 	$group = pick_array($group, ['geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp']);
 	array_map(function($key, $val) use (&$group) {$group[$key] = $val[0];}, array_keys($group), array_values($group));
 	extract($group, EXTR_SKIP);
