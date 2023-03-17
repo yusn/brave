@@ -41,8 +41,8 @@ if (function_exists('get_brave_config')) {
 	$is_check = $comment_config_array['check'];
 }
 
-if ($is_check) {
-	
+if ($is_check && !current_user_can('administrator')) {
+
 	/* --千里之行, 始于足下-- */
 	
 	// step.0: 清缓存
@@ -90,9 +90,7 @@ if ($is_check) {
 	
 	// step.6: 添加来源 防止直接走 wp-comments-post.php
 	$_POST[$comment_channel_field] = get_brave_secure_auth('comment', 'comment_check_key');
-	
-	// step.7: 最后, 交给系统处理
-	require_once(__ROOT__ . '/wp-comments-post.php');
-} else {
-	require_once(__ROOT__ . '/wp-comments-post.php');
 }
+
+// 最后, 交给系统处理
+require_once(__ROOT__ . '/wp-comments-post.php');
