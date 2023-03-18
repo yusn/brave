@@ -41,8 +41,8 @@ if (function_exists('get_brave_config')) {
 	$is_check = $comment_config_array['check'];
 }
 
-if ($is_check && !current_user_can('administrator')) {
-
+if ($is_check) {
+	
 	/* --千里之行, 始于足下-- */
 	
 	// step.0: 清缓存
