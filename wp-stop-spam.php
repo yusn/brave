@@ -24,7 +24,7 @@ $position = stripos($current_dir, 'wp-content');
 if ($position === false) {
 	define('__ROOT__', dirname(__FILE__));
 } else {
-	$arr = explode('\\', substr($current_dir, $position));
+	$arr = explode(DIRECTORY_SEPARATOR, substr($current_dir, $position));
 	$depth = count($arr) + 1;
 	define('__ROOT__', dirname(__FILE__, $depth));
 }
@@ -32,7 +32,7 @@ if ($position === false) {
 /**
  * 加载运行环境.
  */
-require_once(__ROOT__ . '/wp-load.php');
+require(__ROOT__ . '/wp-load.php');
 
 // 检查是否开启评论控制
 $is_check = false;
