@@ -830,44 +830,47 @@ function add_brave_post_format_to_title_rss($title) {
 
 add_filter('the_title_rss', 'add_brave_post_format_to_title_rss');
 
-if (!is_user_logged_in()) {
-	// 非登陆用户评论预处理
-	function preprocess_brave_comment($commentdata) {
-		// 防止直接走 wp-comments-post.php
-		$check_comment = get_brave_config('comment', 'check');
-		if ($check_comment) {
-			$comment_channel_field = get_brave_config('comment', 'comment_channel_field');
-			$comment_channel_val = trim(get_array_key($_POST, $comment_channel_field));
-			if (empty($comment_channel_val)) {
-				return get_brave_error_msg('channel_error_hash_empty'); // 评论来源异常
-			}
-			// 散列校验
-			$sys_hash = get_brave_secure_auth('comment', 'comment_check_key');
-			$is_pass = check_brave_secure_auth($sys_hash, $comment_channel_val);
-			if (!$is_pass) {
-				return get_brave_error_msg('channel_hash_check_fail'); // 评论来源异常
-			}
-		}
-
-		// 禁止外部 trackback,
-		$comment_type = get_array_key($commentdata, 'comment_type');
-		if ($comment_type === 'trackback') {
-			return get_brave_error_msg('trackback_disabled'); // 拒绝 trackback
-		}
+// 评论预处理
+function preprocess_brave_comment($commentdata) {
+	// 修复 WordPress APP 缺失评论来源无法回复评论的问题
+	if (current_user_can('administrator')) {
 		return $commentdata;
 	}
-
-	add_filter('preprocess_comment', 'preprocess_brave_comment', 1);
-
-	// 添加统计代码, 不统计登录用户
-	function add_brave_analytics() {
-		if (function_exists(get_brave_analytics())) {
-			return get_brave_analytics();
+	// 防止直接走 wp-comments-post.php
+	$comment_config_array = get_brave_config('comment');
+	$is_check = $comment_config_array['check'];
+	if ($check_comment && current_user_can('administrator')) {
+		$comment_channel_field = $comment_config_array(['comment_channel_field']);
+		$comment_channel_val = trim(get_array_key($_POST, $comment_channel_field));
+		if (empty($comment_channel_val)) {
+			return get_brave_error_msg('channel_error_hash_empty'); // 评论来源异常
+		}
+		// 散列校验
+		$sys_hash = get_brave_secure_auth('comment', 'comment_check_key');
+		$is_pass = check_brave_secure_auth($sys_hash, $comment_channel_val);
+		if (!$is_pass) {
+			return get_brave_error_msg('channel_hash_check_fail'); // 评论来源异常
 		}
 	}
-	
-	add_action('wp_footer', 'add_brave_analytics');
+
+	// 禁止外部 trackback,
+	$comment_type = get_array_key($commentdata, 'comment_type');
+	if ($comment_type === 'trackback') {
+		return get_brave_error_msg('trackback_disabled'); // 拒绝 trackback
+	}
+	return $commentdata;
 }
+
+add_filter('preprocess_comment', 'preprocess_brave_comment');
+
+// 添加统计代码, 不统计登录用户
+function add_brave_analytics() {
+	if (!is_user_logged_in() && function_exists(get_brave_analytics())) {
+		return get_brave_analytics();
+	}
+}
+
+add_action('wp_footer', 'add_brave_analytics');
 
 /**
  * 正则替换
@@ -1261,4 +1264,5 @@ function pick_array($array, $pick_key_array, $return_type = NULL) {
 }
 
 /**** Tool END ****/
+
 ?>

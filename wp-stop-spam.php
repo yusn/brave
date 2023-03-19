@@ -32,7 +32,7 @@ if ($position === false) {
 /**
  * 加载运行环境.
  */
-require(__ROOT__ . '/wp-load.php');
+require_once(__ROOT__ . '/wp-load.php');
 
 // 检查是否开启评论控制
 $is_check = false;
