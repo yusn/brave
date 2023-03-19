@@ -1059,8 +1059,9 @@ add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 12, 2);
 function hidden_brave_video($output, $atts, $video, $post_id, $library) {
     $filter_video = get_brave_config('query', 'filter_video');
 	if ($filter_video && !current_user_can('administrator')) {
-		return '[视频暂不可见]';
+		$output = '[视频暂不可见]';
 	}
+	return $output;
 }
 
 add_filter('wp_video_shortcode', 'hidden_brave_video', 10, 5);
