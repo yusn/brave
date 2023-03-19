@@ -59,6 +59,7 @@ class Config {
 				'Blog' => array(
 					'terms_in' => array('post-format-aside', 'post-format-video'),
 				),
+				'filter_video' => false, // 是否过滤视频, 开启后视频对访客不可见
 			),
 			// 定制配置参数
 			'custom' => array(

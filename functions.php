@@ -1053,6 +1053,19 @@ function auto_private_brave_post_format($data, $postarr) {
 add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 12, 2);
 
 /**
+ * 过滤日志中的视频, 默认未开启
+ * 自传视频体积太大
+ */
+function hidden_brave_video($output, $atts, $video, $post_id, $library) {
+    $filter_video = get_brave_config('query', 'filter_video');
+	if ($filter_video && !current_user_can('administrator')) {
+		return '[视频暂不可见]';
+	}
+}
+
+add_filter('wp_video_shortcode', 'hidden_brave_video', 10, 5);
+
+/**
  * 异常评论错误提示
  * $comment_status String {spam | hold}
  * $check_type String: {email | IP}
