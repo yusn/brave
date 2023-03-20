@@ -35,8 +35,8 @@ class Config {
 					'Audio' => '音频',
 					'Chat' => '聊天'
 				), // 自定义格式名称
-				'send_mail' => array(
-					'to' => get_bloginfo('admin_email'), // 邮件接收人
+				'mail' => array(
+					'receiver' => get_bloginfo('admin_email'), // 邮件接收人
 				),
 				'auto_space' => false, // boolean 是否启用自动空格(true 发布或更新日志将自动在汉字和单词间加空格)
 				'auto_space_field' => array('post_title', 'post_content', 'post_excerpt'), // array 需要自动空格的字段（目前仅限 POST、PAGE）

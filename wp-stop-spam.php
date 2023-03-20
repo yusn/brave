@@ -48,17 +48,11 @@ if ($is_check) {
 	// step.0: 清缓存
 	nocache_headers();
 	
-	// step.1: 默认评论字段必须为空, 且不能存在 comment_channel
+	// step.1: 默认评论字段必须为空
 	$comment = trim(get_array_key($_POST, 'comment'));
-	$comment_channel_field = $comment_config_array['comment_channel_field'];
-	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
-	if (!empty($comment) || $has_comment_channel) {
+	if (!empty($comment)) {
 		return get_brave_error_msg('channel_error'); // 评论来源异常
 	}
-	if ($has_comment_channel) {
-		return get_brave_error_msg('channel_error_fake_chnl'); // 试图伪造评论来源标记
-	}
-	
 	
 	// step.2: 自定义评论框必须不能为空
 	$comment_text_field = get_brave_comment_text_field();
@@ -67,8 +61,15 @@ if ($is_check) {
 		return get_brave_error_msg('empty_comment'); // 评论内容为空
 	}
 	
+	// step.3: 不能存在 comment_channel
+	$comment_channel_field = $comment_config_array['comment_channel_field'];
+	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
+	if ($has_comment_channel) {
+		return get_brave_error_msg('channel_error_fake_chnl'); // 试图伪造评论来源标记
+	}
+	
 	/** 
-	 * step.3: 字段校验, 至此至少评论是空的, 否则检测不到错误意味着评论已经写入数据库了
+	 * step.4: 字段校验, 至此至少评论是空的, 否则检测不到错误意味着评论已经写入数据库了
 	 * 来自 wp-comments-post.php
 	*/
 	$error_obj = wp_handle_comment_submission( wp_unslash( $_POST ) );
@@ -82,13 +83,13 @@ if ($is_check) {
 		}
 	}
 	
-	// step.4: 执行异常评论检测
+	// step.5: 执行异常评论检测
 	require_once(get_template_directory() . '/plugin/check_comment_history.php');
 	
-	// step.5: 通过检测, 替换评论框
+	// step.6: 通过检测, 替换评论框
 	$_POST['comment'] = $real_comment;
 	
-	// step.6: 添加来源 防止直接走 wp-comments-post.php
+	// step.7: 添加来源 防止直接走 wp-comments-post.php
 	$_POST[$comment_channel_field] = get_brave_secure_auth('comment', 'comment_check_key');
 }
 
