@@ -78,6 +78,9 @@ function disable_image_sizes($brave_img_sizes) {
  * 通过 admin-ajax.php 调用的请求示例:
  * 请求参数: action=get_brave_config_intf&group=basic&item=asset_uri
  * 函数解析: 本请求最后会被组成函数调用 get_brave_config(basic, asset_uri);
+ * 
+ * see: https://developer.wordpress.org/reference/hooks/wp_ajax_action/
+ * wp_send_json: https://developer.wordpress.org/reference/functions/wp_send_json/
  */
 add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
 add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
@@ -93,7 +96,7 @@ function get_brave_config_intf() {
 	$func = 'get_brave_config';
 	if (function_exists($func)) {
 		$response[$item] = $func($group, $item);
-		wp_send_json($response);
+		wp_send_json($response); // wp_send_json 会在尾部执行 wp_die();
 	}
 }
 
