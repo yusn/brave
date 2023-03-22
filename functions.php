@@ -166,7 +166,7 @@ function clear_brave_nav_menu_item_id($item_id, $item, $args) {
 add_filter('nav_menu_item_id', 'clear_brave_nav_menu_item_id', 10, 3);
 
 // 查询过滤
-function exclude_brave_post_from_query($query) {
+function filter_brave_query($query) {
 	$query_config_array = get_brave_config('query');
 	// 首页排除的格式
 	if ($query->is_main_query() && $query->is_home()) {
@@ -212,7 +212,7 @@ function exclude_brave_post_from_query($query) {
 	}
 }
 
-add_action('pre_get_posts', 'exclude_brave_post_from_query');
+add_action('pre_get_posts', 'filter_brave_query');
 
 // 格式化标题
 function format_brave_title($title, $sep) {
