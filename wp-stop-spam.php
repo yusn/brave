@@ -35,11 +35,7 @@ if ($position === false) {
 require_once(__ROOT__ . '/wp-load.php');
 
 // 检查是否开启评论控制
-$is_check = false;
-if (function_exists('get_brave_config')) {
-	$comment_config_array = get_brave_config('comment');
-	$is_check = $comment_config_array['check'];
-}
+$is_check = is_brave_check_comment();
 
 if ($is_check) {
 	
@@ -62,7 +58,7 @@ if ($is_check) {
 	}
 	
 	// step.3: 不能存在 comment_channel
-	$comment_channel_field = $comment_config_array['comment_channel_field'];
+	$comment_channel_field = get_brave_config('comment', 'comment_channel_field');
 	$has_comment_channel = array_key_exists($comment_channel_field, $_POST);
 	if ($has_comment_channel) {
 		return get_brave_error_msg('channel_error_fake_chnl'); // 试图伪造评论来源标记
@@ -91,6 +87,11 @@ if ($is_check) {
 	
 	// step.7: 添加来源 防止直接走 wp-comments-post.php
 	$_POST[$comment_channel_field] = get_brave_secure_auth('comment', 'comment_check_key');
+} else {
+	// 不检测则替换回评论框并放行
+	$comment_text_field = get_brave_comment_text_field();
+	$real_comment = trim(get_array_key($_POST, $comment_text_field));
+	$_POST['comment'] = $real_comment;
 }
 
 // 最后, 交给系统处理

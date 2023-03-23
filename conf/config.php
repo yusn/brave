@@ -91,7 +91,7 @@ class Config {
 					'1002' => 'email 存在待审核评论。',
 					'1003' => 'IP 存在垃圾评论。',
 					'1004' => 'IP 存在待审核评论。',
-					'1005' => '冒充管理员：假去真来真胜假，无原有是有非无。',
+					'1005' => '冒用管理员邮箱。',
 					'1006' => '未启用的评论来源。',
 					'1007' => '不接受 Trackback。',
 					'1008' => '请输入您的评论内容。',
@@ -113,7 +113,7 @@ class Config {
 					'hold' => '30 days ago', // 根据 email 控制待审核评论参照的开始时间
 					'approve' => '1 hour ago', // 根据 email 控制已审核评论参照的开始时间
 				),
-				'comment_text_field' => 'little_star', // 评论文本框字段名称
+				'comment_text_field' => 'real_comment', // 评论文本框字段名称
 				// comment_status_convert_array 项是固定值不可修改
 				'comment_status_convert_array' => array(
 					'hold' => '0',

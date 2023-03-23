@@ -839,17 +839,22 @@ function add_brave_post_format_to_title_rss($title) {
 
 add_filter('the_title_rss', 'add_brave_post_format_to_title_rss');
 
+// 是否开启评论检测
+function is_brave_check_comment() {
+	// 已登陆用户不检测
+	return is_user_logged_in() ? false : true;
+}
+
 // 评论预处理
 function preprocess_brave_comment($commentdata) {
 	// 修复 WordPress APP 缺失评论来源无法回复评论的问题
-	if (current_user_can('administrator')) {
+	if (is_user_logged_in()) {
 		return $commentdata;
 	}
 	// 防止直接走 wp-comments-post.php
-	$comment_config_array = get_brave_config('comment');
-	$is_check = $comment_config_array['check'];
-	if ($check_comment && current_user_can('administrator')) {
-		$comment_channel_field = $comment_config_array(['comment_channel_field']);
+	$is_check = is_brave_check_comment();
+	if ($check_comment) {
+		$comment_channel_field = get_brave_config('comment', 'comment_channel_field');
 		$comment_channel_val = trim(get_array_key($_POST, $comment_channel_field));
 		if (empty($comment_channel_val)) {
 			return get_brave_error_msg('channel_error_hash_empty'); // 评论来源异常
