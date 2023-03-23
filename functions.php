@@ -780,10 +780,16 @@ function clear_brave_cache() {
 }
 
 // 发送邮件
-function send_brave_mail($subject, $body) {
-	$to = get_brave_config('basic', 'mail.to');
-	$headers = array('Content-Type:text/html;charset=UTF-8');
-	wp_mail($to, $subject, $body, $headers);
+function send_brave_mail($to, $title, $body, $header = NULL) {
+	$headers = $header ? $header : array('Content-Type: text/html; charset=UTF-8');
+	wp_mail($to, $title, $body, $header);
+}
+
+add_action('set_brave_async_mail', 'send_brave_mail', 10, 4);
+
+// 异步发送邮件
+function send_brave_async_mail($to, $title, $body, $header = NULL) {
+    wp_schedule_single_event(time() + 300, 'set_brave_async_mail', array($to, $title, $body, $header));
 }
 
 // 自定义密码输入框
