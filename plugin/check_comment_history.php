@@ -18,9 +18,7 @@ if (!is_email($comment_email)) {
 // check_1: 判断是否冒充管理员邮箱
 $admin_email = get_bloginfo('admin_email');
 if (!current_user_can('administrator') && $comment_email === $admin_email) {
-	$code_array = get_brave_info('error_code.impostor');
-	clear_brave_cache();
-	wp_die('别干坏事! 异常代码: ' . $code_array);
+	return get_brave_error_msg('impostor'); // 冒充管理员
 }
 
 // check_2: 根据 email 检测是否存在异常评论
