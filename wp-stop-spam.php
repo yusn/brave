@@ -22,7 +22,7 @@ if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
 $current_dir = dirname(__FILE__);
 $position = stripos($current_dir, 'wp-content');
 if ($position === false) {
-	define('__ROOT__', dirname(__FILE__));
+	define('__ROOT__', $current_dir);
 } else {
 	$arr = explode(DIRECTORY_SEPARATOR, substr($current_dir, $position));
 	$depth = count($arr) + 1;
