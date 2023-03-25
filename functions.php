@@ -781,7 +781,7 @@ function clear_brave_cache() {
 
 // 发送邮件
 function send_brave_mail($to, $title, $body, $header = NULL) {
-	$headers = $header ? $header : array('Content-Type: text/html; charset=UTF-8');
+	$header = $header ? $header : array('Content-Type: text/html; charset=UTF-8');
 	wp_mail($to, $title, $body, $header);
 }
 
