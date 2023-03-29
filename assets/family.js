@@ -69,13 +69,9 @@ function setHeader(value) {
 
 function toggleHeader() {
     var offsetY = window.scrollY;
-    var ifHide = offsetY > lastOffsetY && offsetY > headerHeight / 2;
-    var ifShow = offsetY + window.innerHeight < document.body.offsetHeight;
-    Math.abs(lastOffsetY - offsetY) <= triggerValue
-        ? !1
-        : ifHide
-        ? setHeader('hide')
-        : ifShow && setHeader('show');
+    var isHide = offsetY > lastOffsetY && offsetY > headerHeight / 2;
+    var isShow = offsetY + window.innerHeight < document.body.offsetHeight;
+    Math.abs(lastOffsetY - offsetY) > triggerValue && (isHide ? setHeader('hide') : isShow && setHeader('show'));
     lastOffsetY = offsetY;
 }
 
@@ -226,7 +222,6 @@ function like(el) {
         }
     }
 }
-
 
 /* 1 Mar 2023
  * 封装的调用 XMLHttpRequest 的方法
