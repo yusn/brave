@@ -410,7 +410,7 @@ function get_brave_search_date() {
 
 // 增加移动设备样式
 function add_brave_mobile_class($class) {
-	$detect = new Mobile_Detect;
+	$detect = get_mobileDetect();
 	if ($detect->isMobile()) {
 		set_array_key($class, '', 'mob');
 	}
@@ -949,7 +949,7 @@ function set_brave_post_device_meta($post_id, $post, $update) {
 		return;
 	}
 	
-	$detect = new Mobile_Detect;
+	$detect = get_mobileDetect();
 	if ($detect->isMobile() && !$detect->isTablet()) {
 		// 手机
 		if ($detect->isiPhone()) {
@@ -995,7 +995,7 @@ add_action('save_post', 'set_brave_post_device_meta', 10, 3);
 // 保存评论者的设备信息
 function set_brave_comment_device_meta($comment_ID) {
 	if (!current_user_can('administrator') && !is_admin()) {
-		$detect = new Mobile_Detect;
+		$detect = get_mobileDetect();
 		if ($detect->isMobile() && !$detect->isTablet()) {
 			// 手机
 			if ($detect->isiPhone()) {
@@ -1152,11 +1152,20 @@ function get_brave_config($group, $item = NULL) {
 	return empty($item) ? $group_array : get_array_key($group_array, $item);
 }
 
+/**
+ * 获取 MobileDetect 对象实例
+ * 新版本增加了命名空间
+ */
+function get_mobileDetect() {
+	static $cache = [], $key = 'mobileDetect';
+	return isset($cache[$key]) ? $cache[$key] : $cache[$key] = new Detection\MobileDetect;
+}
+
 
 /**** 加载插件 START ****/
 
-// 加载 Mobile_Detect 插件
-include_once(get_template_directory() . '/plugin/Mobile_Detect.php');
+// 加载 MobileDetect 插件
+include_once(get_template_directory() . '/plugin/MobileDetect.php');
 
 // 加载 like 插件
 include_once(get_template_directory() . '/plugin/like.php');
