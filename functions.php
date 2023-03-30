@@ -1129,27 +1129,24 @@ function get_brave_error_msg($error_name, $title = NULL) {
  * @return string | array
  */
 function get_brave_config($group, $item = NULL) {
-	static $conf_obj, $cached_result = array();
+	static $config, $cached = [];
 	
 	// step1. 有缓存的直接取缓存
-	if (isset($cached_result[$group])) {
-		return empty($item) ? $cached_result[$group] : get_array_key($cached_result[$group], $item);
+	if (isset($cached[$group])) {
+		return empty($item) ? $cached[$group] : get_array_key($cached[$group], $item);
 	}
 	
 	// step2. 没有缓存的重新取
-	if (!isset($conf_obj)) {
+	if (!isset($config)) {
 		include_once(get_template_directory() . '/conf/config.php');
-		$conf_obj = new Config();
+		$config = new Config();
 	}
 	// 获取闭包函数, 闭包函数返回 $group 键对应的元素
-	$func = $conf_obj->get_config($group);
+	$func = $config->get_config($group);
 	$group_array = $func();
 	
-	// 缓存 $group
-	$cached_result[$group] = $group_array;
-	
-	// 不传 $item 或 传入空值, 返回整个 $group; 传 $item, 返回 $item 路径下的值
-	return empty($item) ? $group_array : get_array_key($group_array, $item);
+	// 不传 $item 或 传入空值, 缓存并返回整个 $group; 传 $item, 返回 $item 路径下的值
+	return empty($item) ? $cached[$group] = $group_array : get_array_key($group_array, $item);
 }
 
 /**
