@@ -841,8 +841,8 @@ add_filter('the_title_rss', 'add_brave_post_format_to_title_rss');
 
 // 是否开启评论检测
 function is_brave_check_comment() {
-	// 已登陆用户不检测
-	return is_user_logged_in() ? false : true;
+	// 已登陆用户不检测, 未登陆用户通过配置文件来控制是开启评论检测
+	return is_user_logged_in() ? false : get_brave_config('comment', 'check');
 }
 
 // 评论预处理
@@ -853,7 +853,7 @@ function preprocess_brave_comment($commentdata) {
 	}
 	// 防止直接走 wp-comments-post.php
 	$is_check = is_brave_check_comment();
-	if ($check_comment) {
+	if ($is_check) {
 		$comment_channel_field = get_brave_config('comment', 'comment_channel_field');
 		$comment_channel_val = trim(get_array_key($_POST, $comment_channel_field));
 		if (empty($comment_channel_val)) {
