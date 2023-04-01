@@ -2,8 +2,7 @@
 $arg_status = array(
 		'orderby' => 'rand',
 		'showposts' => 4,
-		'post__not_in'   => array(get_the_ID()),
-		'post__not_in' => get_option('sticky_posts'),
+		'post__not_in'   => array(get_the_ID(), get_option('sticky_posts')),
 		'tax_query' => array(
 							array(
 								'taxonomy' => 'post_format',
@@ -28,3 +27,4 @@ query_posts( $arg_status );
 	</ul>
 </div>
 <?php wp_reset_query(); ?>
+<?php get_template_part('p/peer', 'chat'); ?>

@@ -67,6 +67,7 @@ class Config {
 				),
 				'role' => array(
 				),
+				'peer_title' => '',
 				'auto_private_post_format' => array(), // 发布时自动加密的格式, 如希望 status 和 link 在发布时自动加密, 请填入: 'status', 'link'
 			),
 			// 错误配置参数

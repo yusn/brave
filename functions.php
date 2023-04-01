@@ -379,9 +379,9 @@ function get_brave_age($format = NULL) {
 	return isset($key) ? get_brave_year_of_age($date) : '';
 }
 
-function get_brave_role() {
-	$format = get_post_format();
-	return printf(get_brave_config('custom', 'role.' . $format));
+function get_brave_role($role = NULL) {
+	$role = $role ? $role : get_post_format();
+	return printf(get_brave_config('custom', 'role.' . $role));
 }
 
 // 展示广告
@@ -703,7 +703,7 @@ function get_brave_comment_info($check_key, $comment_status_array, $check_key_va
 
 		// 获取查询开始时间
 		$interval = get_array_key($comment_config_array, $check_key);
-		$comment_approved_time = get_brave_date_string('now', $interval);
+		$comment_approved_time = add_brave_date('now', $interval);
 
 		// 区别: comment_date 系统设置的时区时间, comment_date_gmt 格林尼治时间
 		global $wpdb;
@@ -714,15 +714,65 @@ function get_brave_comment_info($check_key, $comment_status_array, $check_key_va
 	}
 }
 
+// 获取同期日志标题
+function get_brave_peer_title($compare_role) {
+	return printf(get_brave_config('custom', 'peer_title')) . get_brave_role($compare_role); 
+}
+
+// 获取同期日志查询参数
+function get_brave_peer_post_query($compare_role) {
+	$date_array = get_brave_config('custom', 'date');
+	if (empty($date_array)) {
+		return;
+	}
+	$start_date = $date_array[get_post_format()];
+	$end_date = get_the_time('Y-m-d'); // 当前日志的发布时间
+	$interval = get_brave_interval($start_date, $end_date, '%a');
+	$compare_date = $date_array[$compare_role];
+	$from_date = add_brave_interval($compare_date, $interval - 3 . ' day');
+	$to_date = add_brave_interval($compare_date, $interval + 3 . ' day');
+	
+	return array(
+		'orderby' => 'rand',
+		'showposts' => 4,
+		'post__not_in'   => array(get_the_ID(), get_option('sticky_posts')),
+		'tax_query' => array(
+							array(
+								'taxonomy' => 'post_format',
+								'field' => 'slug',
+								'terms' => array('post-format-' . $compare_role),
+								'operator' => 'IN'
+							)
+						),
+		'date_query' => array(
+					'after'		=> $from_date,
+					'before'	=> $to_date,
+					'inclusive' => true,
+		)
+	);
+}
+
 /**
- * 获取时间字符串
+ * 获取时间间隔
+ * $start_date string
+ * $end_date string
+ * @return string 默认获取的间隔单位为天数 https://www.php.net/manual/zh/datetime.diff.php
+ */
+function get_brave_interval($start_date, $end_date, $format = '%a', $timezone = NULL) {
+	$timezone = $timezone ? $timezone : get_brave_config('basic', 'time_zone');
+	$interval = date_diff(date_create($end_date, $timezone), date_create($start_date, $timezone));
+	return $interval->format($format);
+}
+
+/**
+ * 增加日期间隔
  * $start_date String 开始日期,
  * $interval String 默认实时
  * $date_format String 时间格式 默认 Y-m-d H:i:s
  * $timezone timezone 时区类型
- * @return String
+ * @return String 返回增加后的日期字符串
  */
-function get_brave_date_string($start_date = 'now', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = NULL) {
+function add_brave_interval($start_date = 'now', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = NULL) {
 	$timezone = $timezone ? $timezone : get_brave_config('basic', 'time_zone');
 	$start_date = date_create($start_date, $timezone);
 	return date_format(date_add($start_date, date_interval_create_from_date_string($interval)), $date_format);
@@ -1228,6 +1278,11 @@ function get_array_key($array, $key) {
 		}
 	}
 	return $array;
+}
+
+// 忽略指定元素
+function omit_array_key($array, $omit_array) {
+	return array_diff($array, $omit_array);
 }
 
 /**
