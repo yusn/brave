@@ -703,7 +703,7 @@ function get_brave_comment_info($check_key, $comment_status_array, $check_key_va
 
 		// 获取查询开始时间
 		$interval = get_array_key($comment_config_array, $check_key);
-		$comment_approved_time = add_brave_date('now', $interval);
+		$comment_approved_time = add_brave_interval('now', $interval);
 
 		// 区别: comment_date 系统设置的时区时间, comment_date_gmt 格林尼治时间
 		global $wpdb;

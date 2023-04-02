@@ -34,6 +34,11 @@
 本主题采用 [GPL-3.0 license](https://github.com/yusn/Brave/blob/main/LICENSE.md) 开源协议许可。
 
 ## 更新日志
+
+### v1.2.6.1
+- 修复判断是否开启评论检测的逻辑
+- 增加同期日志功能
+
 ### v1.2.6.0
 - 增加 Prismjs 对 PHP 语言的支持
 - 增加异步邮件功能
