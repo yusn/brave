@@ -730,7 +730,7 @@ function get_brave_peer_post_query($compare_role) {
 	$interval = get_brave_interval($start_date, $end_date, '%a');
 	$compare_date = $date_array[$compare_role];
 	$from_date = add_brave_interval($compare_date, $interval - 3 . ' day');
-	$to_date = add_brave_interval($compare_date, $interval + 3 . ' day');
+	$to_date = add_brave_interval($compare_date, $interval + 4 . ' day -1 second');
 	
 	return array(
 		'orderby' => 'rand',
@@ -753,7 +753,7 @@ function get_brave_peer_post_query($compare_role) {
 }
 
 /**
- * 获取时间间隔
+ * 获取两个日期的间隔
  * $start_date string
  * $end_date string
  * @return string 默认获取的间隔单位为天数 https://www.php.net/manual/zh/datetime.diff.php
@@ -770,7 +770,7 @@ function get_brave_interval($start_date, $end_date, $format = '%a', $timezone = 
  * $interval String 默认实时
  * $date_format String 时间格式 默认 Y-m-d H:i:s
  * $timezone timezone 时区类型
- * @return String 返回增加后的日期字符串
+ * @return String 返回增加间隔后的日期字符串
  */
 function add_brave_interval($start_date = 'now', $interval = '0 day', $date_format = 'Y-m-d H:i:s', $timezone = NULL) {
 	$timezone = $timezone ? $timezone : get_brave_config('basic', 'time_zone');
