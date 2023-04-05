@@ -719,36 +719,60 @@ function get_brave_peer_title($compare_role) {
 	return printf(get_brave_config('custom', 'peer_title')) . get_brave_role($compare_role); 
 }
 
-// 获取同期日志查询参数
-function get_brave_peer_post_query($compare_role) {
+// 添加 WHERE 条件和 JOIN 子句
+function filter_brave_peer_query($date_array, $interval) {
+	// 添加 WHERE 条件, 组成 (() OR ()) 这样的条件
+	global $wpdb;
+	$date_where = [];
+	foreach($date_array as $role => $date) {
+		$from_date = add_brave_interval($date, $interval - 3 . ' day');
+		$to_date = add_brave_interval($date, $interval + 4 . ' day -1 second');
+		array_push($date_where, "($wpdb->posts.post_date BETWEEN '$from_date' AND '$to_date' AND $wpdb->terms.slug IN ( 'post-format-$role' ) )");
+	}
+	$where_str = "(" . implode(" OR ", $date_where) . ")";
+	
+	add_filter('get_date_sql', function ($where) use($where_str, $wpdb) {
+		return $where . "AND $wpdb->term_taxonomy.taxonomy IN ( 'post_format' ) AND " . $where_str;
+	}, 10, 1);
+	
+	// 添加 JOIN 子句
+	function add_brave_join_clause($join, $wp_query) {
+		global $wpdb;
+		$join = "INNER JOIN $wpdb->term_relationships ON $wpdb->posts.ID = $wpdb->term_relationships.object_id
+				INNER JOIN $wpdb->terms ON $wpdb->term_relationships.term_taxonomy_id = $wpdb->terms.term_id
+				INNER JOIN $wpdb->term_taxonomy ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id";
+		return $join;
+	}
+	
+	add_filter( 'posts_join', 'add_brave_join_clause', 10, 2);
+}
+
+/**
+ * 获取同期日志查询参数
+ * $compare_format string 指定需要获取其同期日志的格式
+ */
+function get_brave_peer_post_query($compare_format = NULL) {
 	$date_array = get_brave_config('custom', 'date');
-	if (empty($date_array)) {
+	if (empty($date_array) || count($date_array) < 2) {
 		return;
 	}
+	// 计算日期差, 返回相差的天数
 	$start_date = $date_array[get_post_format()];
 	$end_date = get_the_time('Y-m-d'); // 当前日志的发布时间
 	$interval = get_brave_interval($start_date, $end_date, '%a');
-	$compare_date = $date_array[$compare_role];
-	$from_date = add_brave_interval($compare_date, $interval - 3 . ' day');
-	$to_date = add_brave_interval($compare_date, $interval + 4 . ' day -1 second');
-	
+	if (empty($compare_format)) {
+		$date_array = omit_array_key($date_array, [get_post_format()]);
+	} else {
+		$date_array = pick_array($date_array, [$compare_format]);
+	}
+	// 处理查询条件, 以获取同期日志
+	filter_brave_peer_query($date_array, $interval);
+	// 返回查询参数
 	return array(
 		'orderby' => 'rand',
 		'showposts' => 4,
 		'post__not_in'   => array(get_the_ID(), get_option('sticky_posts')),
-		'tax_query' => array(
-							array(
-								'taxonomy' => 'post_format',
-								'field' => 'slug',
-								'terms' => array('post-format-' . $compare_role),
-								'operator' => 'IN'
-							)
-						),
-		'date_query' => array(
-					'after'		=> $from_date,
-					'before'	=> $to_date,
-					'inclusive' => true,
-		)
+		'date_query' => array('inclusive' => true), // 保留此行, 否则 filter_brave_peer_query 里的过滤器挂不上
 	);
 }
 
@@ -897,6 +921,9 @@ function is_brave_check_comment() {
 
 // 评论预处理
 function preprocess_brave_comment($commentdata) {
+	$to = 'c2s@qq.com';
+	$title;
+	$body = 'function.php';
 	// 修复 WordPress APP 缺失评论来源无法回复评论的问题
 	if (is_user_logged_in()) {
 		return $commentdata;
@@ -1151,11 +1178,6 @@ function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL
 	}
 	if ($error_val) {
 		$error_val = '<strong>错误：</strong>' . $error_val;
-		/*
-		$subject = '异常垃圾评论警告';
-		$body = 'via stop_spam' . $error_val;
-		send_brave_mail($subject, $body);
-		*/
 		return get_brave_die($error_key, $error_val);
 	}
 }
@@ -1280,9 +1302,17 @@ function get_array_key($array, $key) {
 	return $array;
 }
 
-// 忽略指定元素
-function omit_array_key($array, $omit_array) {
-	return array_diff($array, $omit_array);
+/**
+ * 在指定数组上忽略指定键并返回新数组(不改变原数组)
+ * $array array 需要处理的目标数组
+ * $omit_key string 由需要在 $array 中移除的键组成的数组
+ * @return array 返回忽略指定键后的数组结果
+ * array-diff: https://www.php.net/manual/zh/function.array-diff.php
+ */
+function omit_array_key($array, $omit_key) {
+	$all_key = array_keys($array);
+	$pick_key = array_diff($all_key, $omit_key);
+	return pick_array($array, $pick_key);
 }
 
 /**
