@@ -691,13 +691,7 @@ function get_brave_comment_info($check_key, $comment_status_array, $check_key_va
 		$comment_IP = $check_key_value;
 		/* 置换 $comment_status_array 为 sql 条件 开始 */
 		$status_convert_array = get_array_key($comment_config_array, 'comment_status_convert_array');
-		$count_status = count($comment_status_array);
-		$comment_status = array();
-		for ($i = 0; $i < $count_status; $i++) {
-			$key = get_array_key($comment_status_array, $i);
-			$val = get_array_key($status_convert_array, $key);
-			$comment_status[$i] = $val;
-		}
+		$comment_status = pick_array($status_convert_array, $comment_status_array);
 		$comment_status = "'" . implode("','", $comment_status) . "'";
 		/* 置换 $comment_status_array 为 sql 条件 结束 */
 
