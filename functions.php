@@ -719,7 +719,11 @@ function get_brave_peer_title($compare_role) {
 	return printf(get_brave_config('custom', 'peer_title')) . get_brave_role($compare_role); 
 }
 
-// 添加 WHERE 条件和 JOIN 子句
+/**
+ * 添加 WHERE 条件和 JOIN 子句
+ * $date_array array 格式对应的日期数组
+ * $interval string 日期或时间间隔
+ */
 function filter_brave_peer_query($date_array, $interval) {
 	// 添加 WHERE 条件, 组成 (() OR ()) 这样的条件
 	global $wpdb;
@@ -750,6 +754,7 @@ function filter_brave_peer_query($date_array, $interval) {
 /**
  * 获取同期日志查询参数
  * $compare_format string 指定需要获取其同期日志的格式
+ * @return array 返回查询参数数组
  */
 function get_brave_peer_post_query($compare_format = NULL) {
 	$date_array = get_brave_config('custom', 'date');
@@ -1305,7 +1310,7 @@ function get_array_key($array, $key) {
 /**
  * 在指定数组上忽略指定键并返回新数组(不改变原数组)
  * $array array 需要处理的目标数组
- * $omit_key string 由需要在 $array 中移除的键组成的数组
+ * $omit_key array 由需要在 $array 中移除的键组成的数组
  * @return array 返回忽略指定键后的数组结果
  * array-diff: https://www.php.net/manual/zh/function.array-diff.php
  */
