@@ -31,7 +31,7 @@
 					while ( have_posts() ) : the_post();
 						get_template_part( 'template-parts/content', 'search');
 					endwhile;
-					get_brave_content_nav( 'nav-below' );
+					get_brave_content_nav( 'next' );
 				?>
 			<?php } else {
 				get_template_part( 'template-parts/content', 'none' );

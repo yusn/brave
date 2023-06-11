@@ -32,5 +32,5 @@ get_header(); ?>
 		endwhile;
 	?>
 </div>
-<?php get_brave_content_nav( 'nav-below' ); ?>
+<?php get_brave_content_nav( 'next' ); ?>
 <?php get_footer(); ?>

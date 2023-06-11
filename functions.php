@@ -100,7 +100,7 @@ function brave_scripts_styles() {
 	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
-		wp_enqueue_script('family', $asset_uri . '/family.js', '', false, true);
+		wp_enqueue_script('family', $asset_uri . '/family.min.js', '', false, true);
 	}
 	if (is_singular() && comments_open() && get_option('thread_comments')) {
 		wp_enqueue_script('comment-reply', '', '', false, true);
@@ -325,10 +325,10 @@ function get_brave_content_nav($method = 'next') {
 	if ($wp_query->max_num_pages > 1) : ?>
         <div class="pagination inner clear">
 			<?php
-				if ($method === 'next') {
-					next_posts_link(__('&hellip;', 'brave'));
-				} else {
+				if ($method === 'prev') {
 					previous_posts_link(__('上一页...', 'brave' ));
+				} else {
+					next_posts_link(__('&hellip;', 'brave'));
 				}
 			?>
         </div>

@@ -11,6 +11,6 @@
 		endif;
 		?>
 	</div>
-	<?php get_brave_content_nav('next');
+	<?php get_brave_content_nav( 'next' );
 	?>
 <?php get_footer(); ?>

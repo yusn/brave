@@ -10,14 +10,11 @@
 				</div>
 			</header>
 		<div class="archive-list">
-		<?php while ( have_posts() ) : the_post();
+		<?php
+			while ( have_posts() ) : the_post();
 				get_template_part( 'template-parts/content', 'search');
 			endwhile;
-            	if(function_exists('wp_pagenavi')) :
-					wp_pagenavi();
-				else :
-				 	get_brave_content_nav( 'nav-below' );
-				endif;
+			get_brave_content_nav( 'next' );
 		?>
 		</div>
 		<?php else : ?>
