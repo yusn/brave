@@ -325,10 +325,10 @@ function get_brave_content_nav($method = 'next') {
 	if ($wp_query->max_num_pages > 1) : ?>
         <div class="pagination inner clear">
 			<?php
-				if ($method === 'prev') {
-					previous_posts_link(__('上一页...', 'brave' ));
-				} else {
+				if ($method === 'next') {
 					next_posts_link(__('&hellip;', 'brave'));
+				} else {
+					previous_posts_link(__('上一页...', 'brave' ));
 				}
 			?>
         </div>
