@@ -93,6 +93,7 @@ if ( is_singular() && pings_open() ) {
 <!--[if IE]>
 <link rel="stylesheet" href="<?php echo $asset_uri; ?>/ie.css" type="text/css" media="all" />
 <![endif]-->
+<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
 <header id="header" class="bg-w" role="banner">

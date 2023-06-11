@@ -1,46 +1,40 @@
 <?php
 
+// remove emoji
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('admin_print_scripts', 'print_emoji_detection_script');
 remove_action('wp_print_styles', 'print_emoji_styles');
 remove_action('admin_print_styles', 'print_emoji_styles');
+remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+remove_filter( 'comment_text_rss', 'wp_staticize_emoji' ); 
+remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+
 remove_filter('the_excerpt', 'wpautop');
 remove_filter('the_excerpt', 'wptexturize');
 remove_filter('the_content', 'wptexturize');
 remove_action('wp_head', 'wp_generator');
 remove_action('wp_head', 'rsd_link');
 remove_action('wp_head', 'wlwmanifest_link');
-// remove_action('wp_head', 'feed_links', 2);
-remove_action('wp_head', 'wp_shortlink_wp_head', 10, 0);
+remove_action('wp_head', 'wp_shortlink_wp_head');
 remove_action('wp_head', 'wp_print_scripts');
-remove_action('wp_head', 'wp_print_head_scripts', 9);
-remove_action('wp_head', 'wp_enqueue_scripts', 1);
+remove_action('wp_head', 'wp_print_head_scripts');
 remove_action('pre_post_update', 'wp_save_post_revision');
+
+// remove max-image-preview
+remove_filter ('wp_robots', 'wp_robots_max_image_preview_large');
+
 // remove_action('wp_head', 'index_rel_link');
 // remove_action('wp_head', 'adjacent_posts_rel_link');
 // remove_action('wp_head', 'wp_shortlink_wp_head');
 
-// Remove embed
-remove_action('rest_api_init', 'wp_oembed_register_route');
-remove_filter('rest_pre_serve_request', '_oembed_rest_pre_serve_request', 10, 4);
-remove_filter('oembed_dataparse', 'wp_filter_oembed_result', 10);
-remove_filter('oembed_response_data', 'get_oembed_response_data_rich', 10, 4);
-remove_action('wp_head', 'wp_oembed_add_discovery_links');
-remove_action('wp_head', 'wp_oembed_add_host_js');
-
-// Remove REST API
-add_filter('rest_enabled', '__return_false');
-add_filter('rest_jsonp_enabled', '__return_false');
-
 // Remove wp-json and HTTP header link 
-remove_action('wp_head', 'rest_output_link_wp_head', 10);
-remove_action('template_redirect', 'rest_output_link_header', 11);
+remove_action('wp_head', 'rest_output_link_wp_head');
 
-// add_action('wp_footer', 'wp_print_scripts', 5);
-// add_action('wp_footer', 'wp_print_head_scripts', 5);
-
-// script 移到底部
-add_action('wp_footer', 'wp_enqueue_scripts', 5);
+/* remove global-styles-inline-css
+ * https://developer.wordpress.org/reference/hooks/wp_enqueue_scripts/
+ * https://wordpress.org/support/topic/remove-global-styles-inline-css/
+ */
+remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
 
 // Remove default gallery style
 add_filter('use_default_gallery_style', '__return_false');
@@ -106,14 +100,14 @@ function brave_scripts_styles() {
 	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
-		wp_enqueue_script('family', $asset_uri . '/family.min.js');
+		wp_enqueue_script('family', $asset_uri . '/family.js', '', false, true);
 	}
 	if (is_singular() && comments_open() && get_option('thread_comments')) {
-		wp_enqueue_script('comment-reply');
+		wp_enqueue_script('comment-reply', '', '', false, true);
 	}
-	// 移除不需要的 CSS
-	wp_dequeue_style('wp-block-library');
-	wp_dequeue_style('classic-theme-styles');
+    wp_dequeue_style('classic-theme-styles');
+	wp_dequeue_style( 'wp-block-library' );
+
 }
 
 add_action('wp_enqueue_scripts', 'brave_scripts_styles');
@@ -326,14 +320,37 @@ function get_brave_search_form($form) {
 add_filter('get_search_form', 'get_brave_search_form');
 
 // Load more
-function get_brave_content_nav() {
+function get_brave_content_nav($method = 'next') {
 	global $wp_query;
 	if ($wp_query->max_num_pages > 1) : ?>
-        <div class="next inner clear">
-			<?php next_posts_link(__('加载更多&hellip;', 'brave')); ?>
+        <div class="pagination inner clear">
+			<?php
+				if ($method === 'next') {
+					next_posts_link(__('&hellip;', 'brave'));
+				} else {
+					previous_posts_link(__('上一页...', 'brave' ));
+				}
+			?>
         </div>
 	<?php endif;
 }
+
+// add next pagination style class
+function add_brave_next_class() {
+	return 'class = "next"';
+}
+
+add_filter('next_posts_link_attributes', 'add_brave_next_class');
+
+// 评论是降序显示的, 最新的在前, 故下一页其实是上一页
+add_filter('previous_comments_link_attributes', 'add_brave_next_class');
+
+// add prev pagination style class
+function add_brave_prev_post_link_class() {
+	return 'class = "prev"';
+}
+
+add_filter('previous_posts_link_attributes', 'add_brave_prev_post_link_class');
 
 /**
  * get_brave_year_of_age

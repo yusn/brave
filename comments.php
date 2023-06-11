@@ -43,7 +43,7 @@ if ( post_password_required() ) {
 		<ol class="commentlist container">
 			<?php wp_list_comments( array( 'callback' => 'brave_comment', 'style' => 'ol', 'short_ping' => true ) ); ?>
 			<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : ?>
-				<div class="next inner clear">
+				<div class="pagination inner clear">
 					<?php previous_comments_link(__('加载更多&hellip;', 'brave')); ?>
 				</div>
 			<?php endif; ?>

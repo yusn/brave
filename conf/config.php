@@ -16,7 +16,7 @@ class Config {
 				'home_url' => get_bloginfo('url'), // get_bloginfo 请参照 https://developer.wordpress.org/reference/functions/get_bloginfo/
 				'site_name' => get_bloginfo('name'),
 				'site_description' => get_bloginfo('description'),
-				'time_zone' => timezone_open(get_option('timezone_string')), // timezone 时区
+				'time_zone' => wp_timezone(), // timezone 时区
 				'asset_uri' => get_stylesheet_directory_uri() . '/assets', // css, js 文件路径
 				'logo' => '', // logo url 填入 logo url 将覆盖默认的图标
 				'beian' => '此处填写备案号', // 备案号
