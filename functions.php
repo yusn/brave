@@ -937,9 +937,6 @@ function is_brave_check_comment() {
 
 // 评论预处理
 function preprocess_brave_comment($commentdata) {
-	$to = 'c2s@qq.com';
-	$title;
-	$body = 'function.php';
 	// 修复 WordPress APP 缺失评论来源无法回复评论的问题
 	if (is_user_logged_in()) {
 		return $commentdata;
@@ -1207,6 +1204,15 @@ function get_brave_comment_error_msg($comment_status, $check_type, $count = NULL
 function get_brave_error_msg($error_name, $title = NULL) {
 	$error_key = get_brave_config('error', 'code.' . $error_name);
 	$error_val = '<strong>错误：</strong>' . get_brave_config('error', 'msg.' . $error_key);
+	
+	// 先发邮件报告
+	$is_report_error = get_brave_config('error', 'is_report_error');
+	if ($is_report_error) {
+		$body = $error_name . '(' . $error_key . '): ' . $error_val;
+		$title = $title ? $title : 'ERROR REPORT';
+		$to = get_brave_config('basic', 'mail.receiver');
+		send_brave_async_mail($to, $title, $body, NULL);
+	}
 	return get_brave_die($error_key, $error_val, $title);
 }
 
