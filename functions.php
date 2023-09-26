@@ -129,7 +129,7 @@ function brave_setup() {
 	add_theme_support('title-tag');
 	add_theme_support('automatic-feed-links');
 	add_theme_support('post-formats', get_brave_config('basic', 'enable_post_format'));
-	register_nav_menu('primary', __('Primary Menu', 'brave'));
+	register_nav_menu('primary', __('Primary Menu', 'brave')); // 注册菜单以供 wp_nav_menu() 使用
 	add_theme_support('post-thumbnails');
 	add_image_size('large', 1200, '', true);
 	add_image_size('medium', 1200, '', true);
@@ -267,7 +267,7 @@ function get_brave_post_thumbnail() {
 		<?php the_post_thumbnail('medium', array('class' => 'mb10')); ?>
 	<?php else : ?>
         <div class="mb10">
-            <a href="<?php the_permalink(); ?>" aria-hidden="true">
+            <a href="<?php the_permalink(); ?>">
 				<?php the_post_thumbnail('medium', array('alt' => the_title_attribute('echo=0'))); ?>
             </a>
         </div>

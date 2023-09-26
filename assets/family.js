@@ -115,7 +115,7 @@ function loadPrism(itemArr) {
 /* infinite-ajax-scroll 11 Jun 2023 */
 var isaEl = document.querySelector('.container');
 if (isaEl) {
-    var iasHtml = '<div class="ias-spinner more"><span class="animation"></span></div><div class="ias-trigger cur more"><a>加载更多</a></div>';
+    var iasHtml = '<div class="ias-spinner more"><span class="animation"></span></div><div class="ias-trigger cur more"><a href="#">加载更多</a></div>';
     isaEl.insertAdjacentHTML('beforeend', iasHtml);
 
     var ias = new InfiniteAjaxScroll('.container', {

@@ -114,7 +114,7 @@ background:#fff;
 background-color:var(--color-fill)
 }
 
-article,details,figcaption,figure,header,hgroup,nav,section,#wpstats,#menu a,img,.s,.wp-caption,.aligncenter {
+article,details,figcaption,figure,header,hgroup,nav,section,#wpstats,#menu a,img,.s,.wp-caption,.aligncenter,.srl {
 display:block
 }
 

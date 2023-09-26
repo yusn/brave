@@ -4,7 +4,7 @@
 <?php extract(pick_array(get_brave_config('basic'), ['asset_uri', 'site_name', 'home_url', 'logo'])); ?>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
 <link rel="profile" href="//gmpg.org/xfn/11" />
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'/>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes'/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -28,8 +28,8 @@ function get_brave_seo($key) {
 	}
 	
 	if (is_home() || is_front_page()) {
-		$description = '';
-		$keywords = '';
+		$description = ''; // 首页描述
+		$keywords = ''; // 首页关键字
 	}
 	
 	if (is_single()) {
@@ -118,14 +118,15 @@ if ( is_singular() && pings_open() ) {
 			<?php endif; ?>
 		</div>
 		<ul id="menu" class="menu" role="navigation" itemscope itemtype="//schema.org/SiteNavigationElement">
-			<li class="searchbox">
+			<div class="searchbox">
 				<form id="search" action="<?php echo $home_url; ?>" method="get">
-					<span class="i-search c3"></span>
-					<input id="menu-search" class="inp s-text" type="text" name="s" value="" />
-					<input type="submit" class="none" value="" />
+					<span id="menu-search" class="i-search c3"></span>
+					<label title="Search" for="search">
+						<input class="inp s-text" type="text" name="s" placeholder="..." value="" />
+					</label>
 				</form>
-			</li>
-			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu') ); ?>
+			</div>
+			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu', 'container' => '') ); ?>
 		</ul>
 	</div>
 </header>
