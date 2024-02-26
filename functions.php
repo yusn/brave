@@ -1256,7 +1256,7 @@ function get_mobileDetect() {
 /**** 加载插件 START ****/
 
 // 加载 MobileDetect 插件
-include_once(get_template_directory() . '/plugin/MobileDetect.php');
+include_once(get_template_directory() . '/plugin/MobileDetect/MobileDetect.php');
 
 // 加载 like 插件
 include_once(get_template_directory() . '/plugin/like.php');
