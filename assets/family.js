@@ -95,12 +95,16 @@ function loadPrism(itemArr) {
                 Prism.highlightAllUnder(el);
             } else {
                 var group = 'basic', item = 'asset_uri',
-                    reqStr = 'action=get_brave_config_intf&group=' + group + '&item=' + item;
-                callXHR(reqStr, prismCb);
+                    reqObj = {group, item, url: '/api/v1/get_config'};
+                callXHR(reqObj, prismCb);
 				
                 function prismCb(_self) {
-                    var res = JSON.parse(_self.response), srcUrl = res[item] + '/prism';
-                    var prismCSS = document.createElement('link'), prismJS = document.createElement('script');
+                    var res = JSON.parse(_self.response);
+					if (0 !== res['code']) {
+						return;
+					}
+					var srcUrl = res['data'][item] + '/prism',
+						prismCSS = document.createElement('link'), prismJS = document.createElement('script');
                     Object.assign(prismJS, {src: srcUrl + '.js', id: 'prism'});
                     Object.assign(prismCSS, {rel: 'stylesheet', href: srcUrl + '.css', media: 'all'});
                     document.body.append(prismJS);
@@ -192,7 +196,7 @@ document.addEventListener('click', function (e) {
 });
 
 function like(el) {
-    var likeCount = el.getAttribute('data-nonce'),
+    var nonce = el.getAttribute('data-nonce'),
         postId = el.getAttribute('data-post-id'),
         commentId = el.getAttribute('data-iscomment'),
         likeClassName = '.sl-' + ('1' === commentId ? 'comment-' : '') + 'button-' + postId,
@@ -205,25 +209,29 @@ function like(el) {
     var likeObj = {like: 'Like', unlike: 'Unlike'};
 
     // 组装请求并调用接口
-    var reqDate = 'action=' + 'process_simple_like' + '&post_id=' + postId + '&nonce=' + likeCount + '&is_comment=' + commentId;
+    var reqDate = {post_id: postId, nonce, is_comment: commentId, url: '/api/v1/post_like'};
     callXHR(reqDate, likeCb);
 
     function likeCb(_self) {
-        var res = JSON.parse(_self.responseText);
-        var likeIcon = res.icon, likeCount = res.count;
-
+        var res = JSON.parse(_self.responseText),
+			data = res['data'];
+			
         // delay remove animation
         setTimeout(removeAnimation, 50);
 
         function removeAnimation() {
-            likeElement.innerHTML = likeIcon + likeCount;
-            if ('unliked' === res.status) {
-                likeElement.setAttribute('title', likeObj.like);
-                likeElement.classList.remove('liked');
-            } else {
-                likeElement.setAttribute('title', likeObj.unlike);
-                likeElement.classList.add('liked');
-            }
+            if (0 === res['code']) {
+				var likeIcon = data.icon, likeCount = data.count;
+				likeElement.innerHTML = likeIcon + likeCount;
+				if ('unliked' === data.status) {
+					likeElement.setAttribute('title', likeObj.like);
+					likeElement.classList.remove('liked');
+				} else {
+					likeElement.setAttribute('title', likeObj.unlike);
+					likeElement.classList.add('liked');
+				}
+			}
+			
             animationElement.firstChild.remove();
             // 加回 sl-button 以操作取消
             el.classList.add('sl-button');
@@ -233,18 +241,20 @@ function like(el) {
 
 /* 1 Mar 2023
  * 封装的调用 XMLHttpRequest 的方法
- * reqStr string
+ * reqObj object
  * callback function 回调函数
  * return
 **/
 
-function callXHR(reqStr, callback) {
+function callXHR(reqObj, callback) {
     var request = new XMLHttpRequest();
-    var ajaxUrl = '/wp-admin/admin-ajax.php';
-    request.open('POST', ajaxUrl, true); // false 同步, true 异步; 使用 false 动画会延迟显示
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    var callUrl = reqObj['url'];
+	delete reqObj.url;
+    request.open('POST', callUrl, true); // false 同步, true 异步; 使用 false 动画会延迟显示
+    request.setRequestHeader('Content-Type', 'application/json');
     // Send request
-    request.send(reqStr);
+	reqObj = JSON.stringify(reqObj);
+    request.send(reqObj);
 
     request.onload = function () {
         var _self = this;  // 可用 e.target, 此处用 function 函数可直接用 this
