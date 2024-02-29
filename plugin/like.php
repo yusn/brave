@@ -21,6 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
+function set_brave_logged_out_uid ($uid, $action) {
+	if ( 'simple-likes-nonce' === $action) {
+		return wp_validate_auth_cookie( $_COOKIE[ LOGGED_IN_COOKIE ], 'logged_in' );
+	}
+}
+add_filter( 'nonce_user_logged_out', 'set_brave_logged_out_uid', 999 , 2);
+*/
+
+/**
  * Processes like/unlike
  * @since    0.5
  */

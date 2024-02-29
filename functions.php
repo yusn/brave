@@ -74,7 +74,7 @@ require_once(get_template_directory() . '/plugin/tool.php');
  *
  * 函数解析: 本请求最后会被组成函数调用 get_brave_config(basic, asset_uri);
  * 
- * see: https://developer.wordpress.org/reference/hooks/wp_ajax_action/
+ * @see: https://developer.wordpress.org/reference/hooks/wp_ajax_action/
  * wp_send_json: https://developer.wordpress.org/reference/functions/wp_send_json/
  */
 // add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
@@ -91,24 +91,23 @@ function get_brave_config_intf($request_data) {
 	$func = 'get_brave_config';
 	if (function_exists($func)) {
 		$response[$item] = $func($group, $item);
-		wp_send_json($response); // wp_send_json 会在尾部执行 wp_die();
+		return $response;
 	}
 }
 
 // 脚本配置
 function brave_scripts_styles() {
-	global $wp_styles;
 	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
-		wp_enqueue_script('family', $asset_uri . '/family.min.js', '', false, true);
+		wp_enqueue_script('family', $asset_uri . '/family.js', '', false, true);
+		wp_localize_script('family', '_brave', array('nonce' => wp_create_nonce('wp_rest')));
 	}
 	if (is_singular() && comments_open() && get_option('thread_comments')) {
 		wp_enqueue_script('comment-reply', '', '', false, true);
 	}
     wp_dequeue_style('classic-theme-styles');
 	wp_dequeue_style( 'wp-block-library' );
-
 }
 
 add_action('wp_enqueue_scripts', 'brave_scripts_styles');
@@ -552,9 +551,8 @@ function get_brave_comment_device() {
 }
 
 // Replace gravatar url
-function replace_brave_avatar($avatar) {
-	$avatar = str_replace(array('www.gravatar.com', 'secure.gravatar.com', '1.gravatar.com', '2.gravatar.com'), 'dn-qiniu-avatar.qbox.me', $avatar);
-	return $avatar;
+function replace_brave_avatar($avatar_url) {
+	return str_replace(array('www.gravatar.com', 'secure.gravatar.com', '1.gravatar.com', '2.gravatar.com'), 'cravatar.cn', $avatar_url);
 }
 
 add_filter('get_avatar', 'replace_brave_avatar', 10, 3);
@@ -1158,8 +1156,7 @@ function auto_private_brave_post_format($data, $postarr) {
 add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 12, 2);
 
 /**
- * 过滤日志中的视频, 默认未开启
- * 自传视频体积太大
+ * 过滤日志中的视频, 默认未开启, 自传视频体积太大
  */
 function hidden_brave_video($output, $atts, $video, $post_id, $library) {
     $filter_video = get_brave_config('query', 'filter_video');
@@ -1246,7 +1243,6 @@ function get_brave_config($group, $item = NULL) {
 
 /**
  * 获取 MobileDetect 对象实例
- * 新版本增加了命名空间
  */
 function get_mobileDetect() {
 	static $cache = [], $key = 'mobileDetect';
@@ -1271,28 +1267,32 @@ require_once(get_template_directory() . '/plugin/gallery.php');
 /**** 加载插件 END ****/
 
 /**
- * 替换默认前缀 wp-json, 注意: 需要到设置-固定链接, 点一下保存更改按钮, 以刷新路由重定向规则使之生效
+ * 替换默认前缀 wp-json, 注意: 每一次更改此前缀都需要到【设置】-【固定链接】, 点一下保存【更改按钮】, 以刷新路由重定向规则使之生效
  *
  * @see https://developer.wordpress.org/reference/hooks/rest_url_prefix/
  */
-function rename_frog_crm_url_prefix() {
+function rename_brave_rest_url_prefix() {
 	return 'api';
 }
 
-add_filter('rest_url_prefix', 'rename_frog_crm_url_prefix'); 
+add_filter('rest_url_prefix', 'rename_brave_rest_url_prefix'); 
 
 // printf(rest_get_url_prefix()); // 验证前缀是否被替换
 
-// 注册 REST 路由
+/**
+ * 注册 REST 路由
+ */
+
+$brave_namespace = '/v1';
 function register_brave_router() {
-	$namespace = '/v1';
+	global $brave_namespace; // wp 为系统保留使用, 不建议使用
 	register_rest_route(
-		$namespace,
+		$brave_namespace,
 		'/post_like',
 		get_brave_router('post_like'),
 	);
 	register_rest_route(
-		$namespace,
+		$brave_namespace,
 		'/get_config',
 		get_brave_router('get_config'),
 	);
@@ -1304,9 +1304,9 @@ add_action('rest_api_init', 'register_brave_router');
 function get_brave_router($route) {
 	$router_config = array(
 		'post_like' => array(
-			'methods'  => 'POST',
-            'callback' => 'process_simple_like',
-			'permission_callback' => '__return_true',
+			'methods'  => 'POST', // HTTP METHOD, 支持逗号分割的字符串, 或字符串数组, 如: 'GET,POST' 或 array('POST', 'PUT');
+            'callback' => 'process_simple_like', // 处理路由请求的最终函数
+			'permission_callback' => '__return_true', // 这是一个回调函数, 若对外公开需要返回 true; 否则, 返回 false. 可以通过此回调函数来判断处理用户权限. for security
 		),
 		'get_config' => array(
 			'methods'  => 'POST',
@@ -1325,7 +1325,11 @@ function get_brave_router($route) {
  * @see https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
  */
 function handle_brave_rest_request_after_callbacks( $response, $handler, $request ) {
-	$http_status_code = 200;
+	global $brave_namespace;
+	if (!str_starts_with($request->get_route(), $brave_namespace)) {
+		return $response;
+	}
+	// $http_status_code = 200; // rest_authorization_required_code();
 	$response_array;
 	if (is_wp_error( $response )) {
 		$response_array = array(
@@ -1338,7 +1342,6 @@ function handle_brave_rest_request_after_callbacks( $response, $handler, $reques
 			'code'    => -1,
 			'error_message' => $response->getMessage(),
 		);
-		$http_status_code = 202;
 	} else {
 		$response_array = array(
 			'code'    => 0,
@@ -1349,16 +1352,18 @@ function handle_brave_rest_request_after_callbacks( $response, $handler, $reques
 		array_merge(
 			$response_array,
 			array(
-				'request' => $request->get_params(),
+				// 'request' => $request->get_params(),
 				'method'  => $request->get_method(),
-			)
+			),
 		),
-		$http_status_code,
+		// $http_status_code,
 	);
 	return $response;
 }
 
 add_filter('rest_request_after_callbacks', 'handle_brave_rest_request_after_callbacks', 9, 3);
+
+
 
 /**
  * Filters the REST API dispatch request result
@@ -1366,9 +1371,12 @@ add_filter('rest_request_after_callbacks', 'handle_brave_rest_request_after_call
  * @see https://developer.wordpress.org/reference/hooks/rest_dispatch_request/
  */
 function handle_brave_rest_dispatch_request($null, $request, $route, $handler) {
-	$request_data = wp_unslash($request->get_json_params());
-	return call_user_func( $handler['callback'], $request_data );
+	global $brave_namespace;
+	if (str_starts_with($request->get_route(), $brave_namespace)) {
+		return call_user_func( $handler['callback'], wp_unslash($request->get_json_params()) );
+	}
 }
+
 add_filter('rest_dispatch_request', 'handle_brave_rest_dispatch_request', 10, 4);
 
 /**

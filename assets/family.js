@@ -98,8 +98,8 @@ function loadPrism(itemArr) {
                     reqObj = {group, item, url: '/api/v1/get_config'};
                 callXHR(reqObj, prismCb);
 				
-                function prismCb(_self) {
-                    var res = JSON.parse(_self.response);
+                function prismCb(data) {
+                    var res = JSON.parse(data.response);
 					if (0 !== res['code']) {
 						return;
 					}
@@ -183,7 +183,7 @@ if (isaEl) {
     // ias.on('error', function (event) {});
 }
 
-/* Like 28 Aug 2022 */
+/* Like 28 Feb 2024 */
 document.addEventListener('click', function (e) {
     for (var el = e.target; el && el !== document; el = el.parentNode) {
         if (el.matches('.sl-button')) {
@@ -212,18 +212,18 @@ function like(el) {
     var reqDate = {post_id: postId, nonce, is_comment: commentId, url: '/api/v1/post_like'};
     callXHR(reqDate, likeCb);
 
-    function likeCb(_self) {
-        var res = JSON.parse(_self.responseText),
-			data = res['data'];
+    function likeCb(data) {
+        var res = JSON.parse(data.responseText),
+			_data = res['data'];
 			
         // delay remove animation
         setTimeout(removeAnimation, 50);
 
         function removeAnimation() {
             if (0 === res['code']) {
-				var likeIcon = data.icon, likeCount = data.count;
+				var likeIcon = _data.icon, likeCount = _data.count;
 				likeElement.innerHTML = likeIcon + likeCount;
-				if ('unliked' === data.status) {
+				if ('unliked' === _data.status) {
 					likeElement.setAttribute('title', likeObj.like);
 					likeElement.classList.remove('liked');
 				} else {
@@ -252,15 +252,16 @@ function callXHR(reqObj, callback) {
 	delete reqObj.url;
     request.open('POST', callUrl, true); // false 同步, true 异步; 使用 false 动画会延迟显示
     request.setRequestHeader('Content-Type', 'application/json');
+	request.setRequestHeader('X-WP-Nonce', _brave['nonce']);
     // Send request
 	reqObj = JSON.stringify(reqObj);
     request.send(reqObj);
 
     request.onload = function () {
-        var _self = this;  // 可用 e.target, 此处用 function 函数可直接用 this
-        if (_self.status === 200) {
+        var data = this;
+        if (data.status === 200) {
             // Success!
-            callback(_self);
+            callback(data);
         } else {
             // 错误处理逻辑
         }
