@@ -183,7 +183,7 @@ if (isaEl) {
     // ias.on('error', function (event) {});
 }
 
-/* Like 28 Feb 2024 */
+/* Like 1 Mar 2024 */
 document.addEventListener('click', function (e) {
     for (var el = e.target; el && el !== document; el = el.parentNode) {
         if (el.matches('.sl-button')) {
@@ -239,7 +239,8 @@ function like(el) {
     }
 }
 
-/* 1 Mar 2023
+/**
+ * 1 Mar 2023
  * 封装的调用 XMLHttpRequest 的方法
  * reqObj object
  * callback function 回调函数

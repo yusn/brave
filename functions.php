@@ -100,7 +100,7 @@ function brave_scripts_styles() {
 	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
-		wp_enqueue_script('family', $asset_uri . '/family.js', '', false, true);
+		wp_enqueue_script('family', $asset_uri . '/family.min.js', '', false, true);
 		wp_localize_script('family', '_brave', array('nonce' => wp_create_nonce('wp_rest')));
 	}
 	if (is_singular() && comments_open() && get_option('thread_comments')) {
@@ -459,19 +459,23 @@ function get_brave_post_meta() {
 	$group = get_post_meta($post->ID);
 	// 纬度, 经度, 城市, 坐标公开状态(1公开,0不公开),天气, 温度
 	$group = pick_array($group, ['geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp']);
-	array_map(function($key, $val) use (&$group) {$group[$key] = $val[0];}, array_keys($group), array_values($group));
+	array_walk($group, function($val, $key) use (&$group) {$group[$key] = $val[0];});
 	extract($group, EXTR_SKIP);
 
 	$html_string = '';
-	if (isset($geo_latitude) && isset($geo_longitude) && isset($geo_public)) {
+	if (isset($geo_public)) {
 		$local = $geo_public === '1' ? 'i-local' : 'i-pin';
 		if ($geo_public === '1' || current_user_can('administrator')) {
-			$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+			if (isset($geo_latitude) && isset($geo_longitude) ) {
+				$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+			}
 			if (isset($geo_city)) {
 				$html_string .= '<span class="ml-tiny font-tiny">' . $geo_city . '</span>';
 			}
 		} elseif ($geo_public === '0') {
+			if (isset($geo_latitude) && isset($geo_longitude) ) {
 				$html_string .= '<span class="' . $local . ' ml" itemprop="map" itemtype="//schema.org/Place"></span>';
+			}
 		}
 	}
 	// 天气
@@ -1299,6 +1303,24 @@ function register_brave_router() {
 }
 
 add_action('rest_api_init', 'register_brave_router');
+
+/**
+ * Register meta keys for posts
+ * rest api posts 接口只能在 meta 中使用这里注册的自定义字段
+ */
+function register_brave_post_meta() {
+	$brave_post_meta = array('geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp', 'post_device_name', 'post_device_ver');
+	$arg = array(
+					'single'       => true,
+					'type'         => 'string',
+					'default'      => '',
+					'show_in_rest' => true,
+				);
+	array_walk($brave_post_meta, function ($val, $key, $arg) {register_meta('post', $val, $arg);}, $arg);
+}
+
+add_action('init', 'register_brave_post_meta');
+
 
 // 获取路由参数选项
 function get_brave_router($route) {
