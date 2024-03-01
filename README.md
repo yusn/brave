@@ -35,10 +35,15 @@
 
 ## 更新日志
 
+### v1.2.6.6
+- MobileDetect 更新到 4.8
+- like 改用 rest api, 做了一些适配 rest api 的调整
+- 替换 gravatar 到国内资源
+- 地理位置信息显示逻辑调整
+
 ### v1.2.6.4
 - Infinite Ajax Scroll 更新到3.1，相关方法优化，翻页时 url 也跟着更新
 - 一些过滤器的调整
-- header.php 添加了
 - 调整配置文件中时区的获取方法
 - 增加错误邮件发送提醒（默认开启）
 

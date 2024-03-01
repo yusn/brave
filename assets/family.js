@@ -95,12 +95,16 @@ function loadPrism(itemArr) {
                 Prism.highlightAllUnder(el);
             } else {
                 var group = 'basic', item = 'asset_uri',
-                    reqStr = 'action=get_brave_config_intf&group=' + group + '&item=' + item;
-                callXHR(reqStr, prismCb);
+                    reqObj = {group, item, url: '/api/v1/get_config'};
+                callXHR(reqObj, prismCb);
 				
-                function prismCb(_self) {
-                    var res = JSON.parse(_self.response), srcUrl = res[item] + '/prism';
-                    var prismCSS = document.createElement('link'), prismJS = document.createElement('script');
+                function prismCb(data) {
+                    var res = JSON.parse(data.response);
+					if (0 !== res['code']) {
+						return;
+					}
+					var srcUrl = res['data'][item] + '/prism',
+						prismCSS = document.createElement('link'), prismJS = document.createElement('script');
                     Object.assign(prismJS, {src: srcUrl + '.js', id: 'prism'});
                     Object.assign(prismCSS, {rel: 'stylesheet', href: srcUrl + '.css', media: 'all'});
                     document.body.append(prismJS);
@@ -115,7 +119,7 @@ function loadPrism(itemArr) {
 /* infinite-ajax-scroll 11 Jun 2023 */
 var isaEl = document.querySelector('.container');
 if (isaEl) {
-    var iasHtml = '<div class="ias-spinner more"><span class="animation"></span></div><div class="ias-trigger cur more"><a>加载更多</a></div>';
+    var iasHtml = '<div class="ias-spinner more"><span class="animation"></span></div><div class="ias-trigger cur more"><a href="#">加载更多</a></div>';
     isaEl.insertAdjacentHTML('beforeend', iasHtml);
 
     var ias = new InfiniteAjaxScroll('.container', {
@@ -179,7 +183,7 @@ if (isaEl) {
     // ias.on('error', function (event) {});
 }
 
-/* Like 28 Aug 2022 */
+/* Like 1 Mar 2024 */
 document.addEventListener('click', function (e) {
     for (var el = e.target; el && el !== document; el = el.parentNode) {
         if (el.matches('.sl-button')) {
@@ -192,7 +196,7 @@ document.addEventListener('click', function (e) {
 });
 
 function like(el) {
-    var likeCount = el.getAttribute('data-nonce'),
+    var nonce = el.getAttribute('data-nonce'),
         postId = el.getAttribute('data-post-id'),
         commentId = el.getAttribute('data-iscomment'),
         likeClassName = '.sl-' + ('1' === commentId ? 'comment-' : '') + 'button-' + postId,
@@ -205,25 +209,29 @@ function like(el) {
     var likeObj = {like: 'Like', unlike: 'Unlike'};
 
     // 组装请求并调用接口
-    var reqDate = 'action=' + 'process_simple_like' + '&post_id=' + postId + '&nonce=' + likeCount + '&is_comment=' + commentId;
+    var reqDate = {post_id: postId, nonce, is_comment: commentId, url: '/api/v1/post_like'};
     callXHR(reqDate, likeCb);
 
-    function likeCb(_self) {
-        var res = JSON.parse(_self.responseText);
-        var likeIcon = res.icon, likeCount = res.count;
-
+    function likeCb(data) {
+        var res = JSON.parse(data.responseText),
+			_data = res['data'];
+			
         // delay remove animation
         setTimeout(removeAnimation, 50);
 
         function removeAnimation() {
-            likeElement.innerHTML = likeIcon + likeCount;
-            if ('unliked' === res.status) {
-                likeElement.setAttribute('title', likeObj.like);
-                likeElement.classList.remove('liked');
-            } else {
-                likeElement.setAttribute('title', likeObj.unlike);
-                likeElement.classList.add('liked');
-            }
+            if (0 === res['code']) {
+				var likeIcon = _data.icon, likeCount = _data.count;
+				likeElement.innerHTML = likeIcon + likeCount;
+				if ('unliked' === _data.status) {
+					likeElement.setAttribute('title', likeObj.like);
+					likeElement.classList.remove('liked');
+				} else {
+					likeElement.setAttribute('title', likeObj.unlike);
+					likeElement.classList.add('liked');
+				}
+			}
+			
             animationElement.firstChild.remove();
             // 加回 sl-button 以操作取消
             el.classList.add('sl-button');
@@ -231,26 +239,30 @@ function like(el) {
     }
 }
 
-/* 1 Mar 2023
+/**
+ * 1 Mar 2023
  * 封装的调用 XMLHttpRequest 的方法
- * reqStr string
+ * reqObj object
  * callback function 回调函数
  * return
 **/
 
-function callXHR(reqStr, callback) {
+function callXHR(reqObj, callback) {
     var request = new XMLHttpRequest();
-    var ajaxUrl = '/wp-admin/admin-ajax.php';
-    request.open('POST', ajaxUrl, true); // false 同步, true 异步; 使用 false 动画会延迟显示
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    var callUrl = reqObj['url'];
+	delete reqObj.url;
+    request.open('POST', callUrl, true); // false 同步, true 异步; 使用 false 动画会延迟显示
+    request.setRequestHeader('Content-Type', 'application/json');
+	request.setRequestHeader('X-WP-Nonce', _brave['nonce']);
     // Send request
-    request.send(reqStr);
+	reqObj = JSON.stringify(reqObj);
+    request.send(reqObj);
 
     request.onload = function () {
-        var _self = this;  // 可用 e.target, 此处用 function 函数可直接用 this
-        if (_self.status === 200) {
+        var data = this;
+        if (data.status === 200) {
             // Success!
-            callback(_self);
+            callback(data);
         } else {
             // 错误处理逻辑
         }

@@ -63,25 +63,26 @@ function disable_image_sizes($brave_img_sizes) {
 	return $brave_img_sizes;
 }
 
+// Require Tool
+require_once(get_template_directory() . '/plugin/tool.php');
+
 /**
  * 提供获取配置的对外接口
  * $group string
  * $item string
  * @return json
  *
- * 通过 admin-ajax.php 调用的请求示例:
- * 请求参数: action=get_brave_config_intf&group=basic&item=asset_uri
  * 函数解析: 本请求最后会被组成函数调用 get_brave_config(basic, asset_uri);
  * 
- * see: https://developer.wordpress.org/reference/hooks/wp_ajax_action/
+ * @see: https://developer.wordpress.org/reference/hooks/wp_ajax_action/
  * wp_send_json: https://developer.wordpress.org/reference/functions/wp_send_json/
  */
-add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
-add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
+// add_action('wp_ajax_nopriv_get_brave_config_intf', 'get_brave_config_intf');
+// add_action('wp_ajax_get_brave_config_intf', 'get_brave_config_intf');
 
-function get_brave_config_intf() {
-	$group = sanitize_text_field($_REQUEST['group']);
-	$item = sanitize_text_field($_REQUEST['item']);
+function get_brave_config_intf($request_data) { 
+	$group = sanitize_text_field($request_data['group']);
+	$item = sanitize_text_field($request_data['item']);
 	// 暂时只响应 asset_uri
 	if (!isset($group) || !isset($item) || $group !== 'basic' || $item !== 'asset_uri') {
 		exit();
@@ -90,24 +91,23 @@ function get_brave_config_intf() {
 	$func = 'get_brave_config';
 	if (function_exists($func)) {
 		$response[$item] = $func($group, $item);
-		wp_send_json($response); // wp_send_json 会在尾部执行 wp_die();
+		return $response;
 	}
 }
 
 // 脚本配置
 function brave_scripts_styles() {
-	global $wp_styles;
 	$asset_uri = get_brave_config('basic', 'asset_uri');
 	if (!is_admin()) {
 		wp_deregister_script('jquery');
 		wp_enqueue_script('family', $asset_uri . '/family.min.js', '', false, true);
+		wp_localize_script('family', '_brave', array('nonce' => wp_create_nonce('wp_rest')));
 	}
 	if (is_singular() && comments_open() && get_option('thread_comments')) {
 		wp_enqueue_script('comment-reply', '', '', false, true);
 	}
     wp_dequeue_style('classic-theme-styles');
 	wp_dequeue_style( 'wp-block-library' );
-
 }
 
 add_action('wp_enqueue_scripts', 'brave_scripts_styles');
@@ -129,7 +129,7 @@ function brave_setup() {
 	add_theme_support('title-tag');
 	add_theme_support('automatic-feed-links');
 	add_theme_support('post-formats', get_brave_config('basic', 'enable_post_format'));
-	register_nav_menu('primary', __('Primary Menu', 'brave'));
+	register_nav_menu('primary', __('Primary Menu', 'brave')); // 注册菜单以供 wp_nav_menu() 使用
 	add_theme_support('post-thumbnails');
 	add_image_size('large', 1200, '', true);
 	add_image_size('medium', 1200, '', true);
@@ -267,7 +267,7 @@ function get_brave_post_thumbnail() {
 		<?php the_post_thumbnail('medium', array('class' => 'mb10')); ?>
 	<?php else : ?>
         <div class="mb10">
-            <a href="<?php the_permalink(); ?>" aria-hidden="true">
+            <a href="<?php the_permalink(); ?>">
 				<?php the_post_thumbnail('medium', array('alt' => the_title_attribute('echo=0'))); ?>
             </a>
         </div>
@@ -459,19 +459,23 @@ function get_brave_post_meta() {
 	$group = get_post_meta($post->ID);
 	// 纬度, 经度, 城市, 坐标公开状态(1公开,0不公开),天气, 温度
 	$group = pick_array($group, ['geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp']);
-	array_map(function($key, $val) use (&$group) {$group[$key] = $val[0];}, array_keys($group), array_values($group));
+	array_walk($group, function($val, $key) use (&$group) {$group[$key] = $val[0];});
 	extract($group, EXTR_SKIP);
 
 	$html_string = '';
-	if (isset($geo_latitude) && isset($geo_longitude) && isset($geo_public)) {
+	if (isset($geo_public)) {
 		$local = $geo_public === '1' ? 'i-local' : 'i-pin';
 		if ($geo_public === '1' || current_user_can('administrator')) {
-			$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+			if (isset($geo_latitude) && isset($geo_longitude) ) {
+				$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+			}
 			if (isset($geo_city)) {
 				$html_string .= '<span class="ml-tiny font-tiny">' . $geo_city . '</span>';
 			}
 		} elseif ($geo_public === '0') {
+			if (isset($geo_latitude) && isset($geo_longitude) ) {
 				$html_string .= '<span class="' . $local . ' ml" itemprop="map" itemtype="//schema.org/Place"></span>';
+			}
 		}
 	}
 	// 天气
@@ -551,9 +555,8 @@ function get_brave_comment_device() {
 }
 
 // Replace gravatar url
-function replace_brave_avatar($avatar) {
-	$avatar = str_replace(array('www.gravatar.com', 'secure.gravatar.com', '1.gravatar.com', '2.gravatar.com'), 'dn-qiniu-avatar.qbox.me', $avatar);
-	return $avatar;
+function replace_brave_avatar($avatar_url) {
+	return str_replace(array('www.gravatar.com', 'secure.gravatar.com', '1.gravatar.com', '2.gravatar.com'), 'cravatar.cn', $avatar_url);
 }
 
 add_filter('get_avatar', 'replace_brave_avatar', 10, 3);
@@ -1157,8 +1160,7 @@ function auto_private_brave_post_format($data, $postarr) {
 add_filter('wp_insert_post_data', 'auto_private_brave_post_format', 12, 2);
 
 /**
- * 过滤日志中的视频, 默认未开启
- * 自传视频体积太大
+ * 过滤日志中的视频, 默认未开启, 自传视频体积太大
  */
 function hidden_brave_video($output, $atts, $video, $post_id, $library) {
     $filter_video = get_brave_config('query', 'filter_video');
@@ -1245,7 +1247,6 @@ function get_brave_config($group, $item = NULL) {
 
 /**
  * 获取 MobileDetect 对象实例
- * 新版本增加了命名空间
  */
 function get_mobileDetect() {
 	static $cache = [], $key = 'mobileDetect';
@@ -1256,7 +1257,7 @@ function get_mobileDetect() {
 /**** 加载插件 START ****/
 
 // 加载 MobileDetect 插件
-include_once(get_template_directory() . '/plugin/MobileDetect.php');
+include_once(get_template_directory() . '/plugin/MobileDetect/MobileDetect.php');
 
 // 加载 like 插件
 include_once(get_template_directory() . '/plugin/like.php');
@@ -1269,141 +1270,144 @@ require_once(get_template_directory() . '/plugin/gallery.php');
 
 /**** 加载插件 END ****/
 
-
-/**** Tool START ****/
-
 /**
- * 生成随机字符串
- * $hash_length int 想要的随机字符串长度 低于 8 位会自动重置为 8 - 18 的随机长度
- * $hash_mask string 随机字符串的来源
+ * 替换默认前缀 wp-json, 注意: 每一次更改此前缀都需要到【设置】-【固定链接】, 点一下保存【更改按钮】, 以刷新路由重定向规则使之生效
+ *
+ * @see https://developer.wordpress.org/reference/hooks/rest_url_prefix/
  */
-function get_brave_hash($hash_length = NULL, $hash_mask = NULL) {
-	$hash_length = (!is_int($hash_length) || (is_int($hash_length) && abs($hash_length) < 8)) ? rand(8, 18) : abs($hash_length);
-	$hash_mask = is_string($hash_mask) ? $hash_mask : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-	return substr(str_shuffle($hash_mask), -$hash_length);
+function rename_brave_rest_url_prefix() {
+	return 'api';
 }
 
-/**
- * 获取散列值
- * $group string
- * $item string 通过 $group 和 $item 获取对应配置中的字符串
- * $schema string 可选, 默认使用 wp_config.php 配置的 AUTH_KEY 或 AUTH_SALT
- * @return boolean 校验通过返回 true; 否则,返回 false
- * 
- * wp_hash https://developer.wordpress.org/reference/functions/wp_hash/
- * wp_salt https://developer.wordpress.org/reference/functions/wp_salt/
-*/
-function get_brave_secure_auth($group, $item, $schema = 'auth') {
-	return wp_hash(get_brave_config($group, $item), $schema);
-}
+add_filter('rest_url_prefix', 'rename_brave_rest_url_prefix'); 
+
+// printf(rest_get_url_prefix()); // 验证前缀是否被替换
 
 /**
- * 获取数组键值
- * $array array
- * $key string | Int 数组键 或 数组索引。 支持多级键, 以.号分隔, 示例: get_array_key(array, 'key1.key2');
- * @return
- * wp 已有类似函数 _wp_array_get 对键的使用略有不同
+ * 注册 REST 路由
  */
-function get_array_key($array, $key) {
-	if (!is_array($array) || (!is_string($key) && !is_int($key))) {
-		return;
-	}
-	
-	// 传入的是键 或 索引
-	$item_array = explode('.', $key);
-	$count_item = count($item_array);
-	for ($i = 0; $i < $count_item; $i++) {
-		$key = $item_array[$i];
-		if (!is_array($array)) {
-			$array = NULL; // 非数组无法获取下一层, 置为 NULL 并跳出
-			break;
-		} else {
-			$array = array_key_exists($key, $array) ? $array[$key] : NULL; // 获取下一层, 获取不存在的 key 会报警告(Notice)
-		}
-	}
-	return $array;
-}
 
-/**
- * 在指定数组上忽略指定键并返回新数组(不改变原数组)
- * $array array 需要处理的目标数组
- * $omit_key array 由需要在 $array 中移除的键组成的数组
- * @return array 返回忽略指定键后的数组结果
- * array-diff: https://www.php.net/manual/zh/function.array-diff.php
- */
-function omit_array_key($array, $omit_key) {
-	$all_key = array_keys($array);
-	$pick_key = array_diff($all_key, $omit_key);
-	return pick_array($array, $pick_key);
-}
-
-/**
- * 移除数组键值
- * $array array  PHP 函数调用默认是值传递, 此处改用引用传递
- * $key string
- * @return
- * 引用传递函数参数 https://www.php.net/manual/zh/functions.arguments.php 示例3
- */
-function remove_array_key(&$array, $key) {
-	if (array_key_exists($key, $array)) {
-		unset($array[$key]);
-	}
-}
-
-/**
- * 设置数组键值
- * $array array
- * $key string
- * @return
- * wp 有类似函数 _wp_array_set 支持多级键值设置
- */
-function set_array_key(&$array, $key, $val) {
-	$array[$key] = $val;
-}
-
-/**
- * 生成错误信息: 其实就是对 wp_die 的包装
- * $error_key int|string 错误代码
- * $error_val string 错误详情
- * $title string 错误页面标题 (网页标题)
- * @return WP_Error
- */
-function get_brave_die($error_key, $error_val, $title = NULL) {
-	$title = empty($title) ? '出现异常, 请确认!' : $title; // eg: Comment Submission Failure
-	clear_brave_cache();
-	wp_die(
-		'<p>' . $error_val . '代码: ' . $error_key . '</p>',
-		__($title),
-		array(
-			'response' => $error_key,
-			'back_link' => true,
-		)
+$brave_namespace = '/v1';
+function register_brave_router() {
+	global $brave_namespace; // wp 为系统保留使用, 不建议使用
+	register_rest_route(
+		$brave_namespace,
+		'/post_like',
+		get_brave_router('post_like'),
+	);
+	register_rest_route(
+		$brave_namespace,
+		'/get_config',
+		get_brave_router('get_config'),
 	);
 }
 
+add_action('rest_api_init', 'register_brave_router');
+
 /**
- * 拣选数组键/值/对
- * $array array 来源数组
- * $pick_key_array 需要拣选的 $array 的键或索引, 如: ['a', 'b'] / [0, 1]
- * $return_type string 拣选目标, 支持对 键/值/键值对 的拣选
- * return array
- * 模仿 JavaScript lodash 的 pick 方法
+ * Register meta keys for posts
+ * rest api posts 接口只能在 meta 中使用这里注册的自定义字段
  */
-function pick_array($array, $pick_key_array, $return_type = NULL) {
-	// 移除 $pick_key_array 里不存在于 $array 的值
-	$pick_key_array = array_filter($pick_key_array, function ($val) use ($array) {
-		return array_key_exists($val, $array);
-	});
-	extract($array, EXTR_SKIP);
-	$array = compact($pick_key_array);
-	if (is_string($return_type)) {
-		$key_array = ['k', 'key', 'keys'];
-		$val_array = ['v', 'val', 'value', 'values'];
-		return in_array($return_type, $key_array) ? array_keys($array) : (in_array($return_type, $val_array) ? array_values($array) : []);
-	}
-	return $array;
+function register_brave_post_meta() {
+	$brave_post_meta = array('geo_latitude', 'geo_longitude', 'geo_city', 'geo_public', 'wx_weather', 'wx_temp', 'post_device_name', 'post_device_ver');
+	$arg = array(
+					'single'       => true,
+					'type'         => 'string',
+					'default'      => '',
+					'show_in_rest' => true,
+				);
+	array_walk($brave_post_meta, function ($val, $key, $arg) {register_meta('post', $val, $arg);}, $arg);
 }
 
-/**** Tool END ****/
+add_action('init', 'register_brave_post_meta');
 
+
+// 获取路由参数选项
+function get_brave_router($route) {
+	$router_config = array(
+		'post_like' => array(
+			'methods'  => 'POST', // HTTP METHOD, 支持逗号分割的字符串, 或字符串数组, 如: 'GET,POST' 或 array('POST', 'PUT');
+            'callback' => 'process_simple_like', // 处理路由请求的最终函数
+			'permission_callback' => '__return_true', // 这是一个回调函数, 若对外公开需要返回 true; 否则, 返回 false. 可以通过此回调函数来判断处理用户权限. for security
+		),
+		'get_config' => array(
+			'methods'  => 'POST',
+            'callback' => 'get_brave_config_intf',
+			'permission_callback' => '__return_true',
+		),
+	);
+	return $router_config[$route];
+}
+
+
+/**
+ * Filters the response immediately after executing any REST API callbacks
+ *
+ * @see https://developer.wordpress.org/reference/hooks/rest_request_after_callbacks/
+ * @see https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/
+ */
+function handle_brave_rest_request_after_callbacks( $response, $handler, $request ) {
+	global $brave_namespace;
+	if (!str_starts_with($request->get_route(), $brave_namespace)) {
+		return $response;
+	}
+	// $http_status_code = 200; // rest_authorization_required_code();
+	$response_array;
+	if (is_wp_error( $response )) {
+		$response_array = array(
+			'code'    => -1,
+			'error_code' => $response->get_error_code(),
+			'error_message' => $response->get_error_message(),
+		);
+	} else if ($response instanceof Exception) {
+		$response_array = array(
+			'code'    => -1,
+			'error_message' => $response->getMessage(),
+		);
+	} else {
+		$response_array = array(
+			'code'    => 0,
+			'data'    => $response,
+		);
+	}
+	$response = new WP_REST_Response(
+		array_merge(
+			$response_array,
+			array(
+				// 'request' => $request->get_params(),
+				'method'  => $request->get_method(),
+			),
+		),
+		// $http_status_code,
+	);
+	return $response;
+}
+
+add_filter('rest_request_after_callbacks', 'handle_brave_rest_request_after_callbacks', 9, 3);
+
+
+
+/**
+ * Filters the REST API dispatch request result
+ *
+ * @see https://developer.wordpress.org/reference/hooks/rest_dispatch_request/
+ */
+function handle_brave_rest_dispatch_request($null, $request, $route, $handler) {
+	global $brave_namespace;
+	if (str_starts_with($request->get_route(), $brave_namespace)) {
+		return call_user_func( $handler['callback'], wp_unslash($request->get_json_params()) );
+	}
+}
+
+add_filter('rest_dispatch_request', 'handle_brave_rest_dispatch_request', 10, 4);
+
+/**
+ * Sets the default exception handler if an exception is not caught within a try/catch block.
+ * Execution will stop after the callback is called.
+ */
+set_exception_handler('conn_global_exception_cb');
+function conn_global_exception_cb(Throwable $exception) {
+	$err = 'Uncaught exceptiod: ' . $exception->getMessage();
+	echo $err;
+}
 ?>

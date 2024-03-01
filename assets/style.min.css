@@ -15,7 +15,7 @@ body,.inp,.btn,h5,h6,.mob .comment-content,.mob .menu-item,.mob .site-name{font-
 .mob{font-size:1.125rem;font-size:18px}
 .footer,.gallery img{background:#f1f1f1;background:var(--background-main)}
 .home,.bg-w,.bp,.comments,.page-template-default,.archive,.search,.error404{background:#fff;background:var(--background-main)}
-article,details,figcaption,figure,header,hgroup,nav,section,#wpstats,#menu a,img,.s,.wp-caption,.aligncenter{display:block}
+article,details,figcaption,figure,header,hgroup,nav,section,#wpstats,#menu a,img,.s,.wp-caption,.aligncenter,.srl{display:block}
 sub,sup{font-size:75%;line-height:0;vertical-align:baseline}
 sup{top:-.5em}
 sub{bottom:-.5em}
@@ -137,7 +137,7 @@ li,.comment,.lsn{list-style:none}
 .text_box{width:320px}
 #reply-title,.fwt,.i-search:before,h4{font-size:18px;font-size:1.125rem}
 h2,#reply-title,.fwt,.site-name{font-weight:400}
-@font-face{font-family:'frog';src:url(/assets/fonts/frog.eot?cz9zp2);src:url(/assets/fonts/frog.eot?cz9zp2#iefix) format("embedded-opentype"),url(/assets/fonts/frog.ttf?cz9zp2) format("truetype"),url(/assets/fonts/frog.woff?cz9zp2) format("woff"),url(/assets/fonts/frog.svg?cz9zp2#frog) format("svg")}
+@font-face{font-family:'frog';src:url(/assets/fonts/frog.eot);src:url(/assets/fonts/frog.eot#iefix) format("embedded-opentype"),url(/assets/fonts/frog.ttf) format("truetype"),url(/assets/fonts/frog.woff) format("woff"),url(/assets/fonts/frog.svg#frog) format("svg")}
 [class^="i-"],[class*=" i-"]{font-family:'frog'!important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .i-comment,.i-local,.i-pen,.i-reply,.i-heart,.i-heart-o,.more-link{line-height:1}
 .i-frog:before{content:"\e600"}
