@@ -467,10 +467,10 @@ function get_brave_post_meta() {
 		$local = $geo_public === '1' ? 'i-local' : 'i-pin';
 		if ($geo_public === '1' || current_user_can('administrator')) {
 			if (isset($geo_latitude) && isset($geo_longitude) ) {
-				$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=$geo_latitude,$geo_longitude&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
+				$html_string .= '<span class="ml"><a class="gmap" href="//maps.google.com/maps?q=' . $geo_latitude . ',' . $geo_longitude . '&hl=zh-cn&t=m&z=15" itemprop="map" itemtype="//schema.org/Place"><span class="' . $local . '"></span></a></span>';
 			}
 			if (isset($geo_city)) {
-				$html_string .= '<span class="ml-tiny font-tiny">' . $geo_city . '</span>';
+				$html_string .= '<span class="ml-tiny">' . $geo_city . '</span>';
 			}
 		} elseif ($geo_public === '0') {
 			if (isset($geo_latitude) && isset($geo_longitude) ) {
