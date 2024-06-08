@@ -150,14 +150,14 @@ height:0
 }
 
 a,.ias-trigger {
-color:#06c;
-color:var(--dark-color-b,#06c);
+color:#2d4ade;
+color:var(--dark-color-b,#2d4ade);
 transition:all .2s ease-in-out,opacity .2s ease-in-out
 }
 
 .c4 a:hover,a:hover {
-color:#495fd9;
-color:var(--dark-color-b,#495fd9)
+color:#243bb1;
+color:var(--dark-color-b,#243bb1)
 }
 
 a,a:hover {
