@@ -19,9 +19,10 @@ function get_brave_seo($key) {
 	
 	$keywords = ''; $description = ''; $author = '';
 	
-	/* 获取用户名称, query 外层需要借助 get_queried_object
-	 * https://developer.wordpress.org/reference/functions/get_queried_object/
-	**/
+	/**
+	 * 获取用户名称, query 外层需要借助 get_queried_object
+	 * @see https://developer.wordpress.org/reference/functions/get_queried_object/
+	 */
 	$obj = get_queried_object();
 	if($obj && isset($obj->ID)){
 		$author = get_the_author_meta('display_name', $obj->post_author); 
