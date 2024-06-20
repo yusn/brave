@@ -1,5 +1,8 @@
 <?php
 
+// remove <title> tag from wp_head()
+remove_action('wp_head', '_wp_render_title_tag', 1);
+
 // remove emoji
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('admin_print_scripts', 'print_emoji_detection_script');
