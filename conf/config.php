@@ -144,7 +144,7 @@ class Config {
 	/* 获取广告 */
 	public function display_ad($ad_name) {
 		$display_ad = $this->config_array['basic']['display_ad'];
-		if (display_ad && is_callable($this->$ad_name())) {
+		if ($display_ad && is_callable($this->$ad_name())) {
 			return $ad_name();
 		}
 	}
