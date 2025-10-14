@@ -148,6 +148,6 @@ class Config {
 			return $ad_name();
 		}
 	}
-};
+}
 
 ?>
