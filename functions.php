@@ -1360,7 +1360,6 @@ function handle_brave_rest_request_after_callbacks( $response, $handler, $reques
 		return $response;
 	}
 	// $http_status_code = 200; // rest_authorization_required_code();
-	$response_array;
 	if (is_wp_error( $response )) {
 		$response_array = array(
 			'code'    => -1,
