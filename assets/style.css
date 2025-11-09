@@ -22,21 +22,20 @@ html {
 
 @media (prefers-color-scheme: dark) {
     body {
-        --color-fill: #181819;
+        --background-main: #181819;
+        --background-selection: #0260d1;
         --dark-background-69: #4e4e4f;
-        --dark-background-c8: #d1d1d2;
+        --background-input: #e1e1e1;
+        --background-input-focus: #f5f5f5;
         --dark-background-28: #282828;
         --dark-background-e0: #e05650;
         --dark-background-ef: #df9994;
         --dark-background-5e: #5e5e5f;
-        --dark-background-e5: #e5e5e6;
         --dark-solid: 1px solid #3a3a3b;
         --dark-solid-999: 3px solid #999;
-        --dark-solid-df: 1px solid #df9994;
-        --dark-color-basic: #f5f5f6;
+        --dark-color-f5: #f5f5f6;
         --dark-color-sec: #a1a1a2;
-        --dark-color-b: #e05650;
-        --dark-color-c: #f5f5f6;
+        --dark-color-b: #94b9f4;
         --dark-color-a9: #a9a9aa;
         --dark-color-bbb: #bbb;
         --dark-color-e5: #e5e5e6
@@ -44,46 +43,33 @@ html {
 }
 
 :root {
-    --color-fill: #fff;
+    --background-main: #fff;
+    --background-selection: #3392ff;
     --light-solid: 1px solid #e5e5e5;
     --light-color-basic: #444;
+    --background-input: #fff;
+    --background-input-focus: #f5f5f5;
+    background-input: #fff;
     --light-color-333: #333;
     --light-color-aaa: #aaa;
     --light-color-fff: #fff;
     --light-background-fff: #fff;
-    --light-background-f2: #f2f2f2;
+    --light-background-code: #f2f2f2;
     --light-background-e0: #998079
 }
 
 body {
-    color-scheme: light dark;
-    background-color: var(--color-fill);
+    background: var(--background-main);
     color: #444;
-    color: var(--dark-color-basic, var(--light-color-basic));
-    font-family: merriweather, "pingfang sc", "Microsoft Yahei", Helvetica, sans-serif;
+    color: var(--dark-color-f5, var(--light-color-basic));
+    font-family: "pingfang sc", "Microsoft Yahei", Helvetica, sans-serif;
     text-rendering: optimizelegibility
 }
 
-body[data-color-scheme="light"] {
-    color-scheme: light
-}
-
-body[data-color-scheme="dark"] {
-    color-scheme: dark
-}
-
-::selection {
-    background: #a9b5D3;
-    text-shadow: none
-}
-
-::-moz-selection {
-    background: #C9D5D3;
-    text-shadow: none
-}
-
-::-webkit-selection {
-    background: #C9D5D3;
+::selection, ::-webkit-selection, ::-moz-selection {
+    background: #3392ff;
+    background: var(--background-selection);
+    color: #fff;
     text-shadow: none
 }
 
@@ -93,7 +79,6 @@ body, .inp, .btn, h5, h6, .mob .comment-content, .mob .menu-item, .mob .site-nam
 }
 
 #header {
-    transition: top .3s ease-in-out;
     position: fixed;
     z-index: 999;
     top: 0
@@ -106,12 +91,12 @@ body, .inp, .btn, h5, h6, .mob .comment-content, .mob .menu-item, .mob .site-nam
 
 .footer, .gallery img {
     background: #f1f1f1;
-    background-color: var(--color-fill)
+    background: var(--background-main)
 }
 
 .home, .bg-w, .bp, .comments, .page-template-default, .archive, .search, .error404 {
     background: #fff;
-    background-color: var(--color-fill)
+    background: var(--background-main)
 }
 
 article, details, figcaption, figure, header, hgroup, nav, section, #wpstats, #menu a, img, .s, .wp-caption, .aligncenter, .srl {
@@ -150,14 +135,14 @@ img {
 }
 
 a, .ias-trigger {
-    color: #2d4ade;
-    color: var(--dark-color-b, #2d4ade);
+    color: #06c;
+    color: var(--dark-color-b, #06c);
     transition: all .2s ease-in-out, opacity .2s ease-in-out
 }
 
 .c4 a:hover, a:hover {
-    color: #243bb1;
-    color: var(--dark-color-b, #243bb1)
+    color: #495fd9;
+    color: var(--dark-color-b, #495fd9)
 }
 
 a, a:hover {
@@ -199,9 +184,9 @@ a, a:hover {
     background: var(--dark-background-28, #f7f7f7)
 }
 
-blockquote, pre, code {
-    background: #f2f2f2;
-    background: var(--dark-background-69, var(--light-background-f2))
+code {
+    background: #f6f7f9;
+    background: var(--dark-background-69, var(--light-background-code))
 }
 
 blockquote, pre {
@@ -209,40 +194,36 @@ blockquote, pre {
     border-left: var(--dark-solid-999, 3px solid #e5e5e5)
 }
 
-code {
-    border-bottom: 1px solid #ccc;
-    border-bottom: var(--dark-solid-df, 1px solid #ccc)
-}
-
 #header, .bp, .fat, .table {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .04)
 }
 
 .text-bg, .inp {
-    background: var(--dark-background-c8, var(--dark-background-fff))
+    background: var(--background-input)
 }
 
 #menu a:hover, h1, h2, h3 {
     color: #212012;
-    color: var(--dark-color-c, #212012)
+    color: var(--dark-color-f5, #212012)
 }
 
-.frog, .f-name a:hover {
-    color: #08353c;
-    color: var(--dark-color-a9, #08353c)
+.frog a, .f-name a:hover {
+    color: #333;
+    color: var(--dark-color-bbb, #333)
 }
 
-.frog:hover {
-    color: #666;
-    color: var(--dark-color-c, #666)
+#menu a, .f-name a, .frog a:hover {
+    color: #777;
+    color: var(--dark-color-a9, #777)
 }
 
-.f-name a, #menu a {
-    color: #7A7877;
-    color: var(--dark-color-a9, #7a7877)
+.entry-content li:before, .ias-noneleft, h4, del, .ding {
+    color: #888;
+    color: var(--dark-color-bbb, #888)
 }
 
-.entry-content li:before, .ias-noneleft {
+code, pre, blockquote {
+    font-family: Monaco, Consolas, Lucida Console, Liberation Mono, monospace;
     color: #999;
     color: var(--dark-color-bbb, #999)
 }
@@ -299,9 +280,9 @@ code {
     color: var(--dark-color-sec, var(--light-color-aaa))
 }
 
-.c5, .title, .f-f a:hover, .site-name {
+.c5, .title, .f-f a:hover {
     color: #333;
-    color: var(--dark-color-basic, var(--light-color-333))
+    color: var(--dark-color-f5, var(--light-color-333))
 }
 
 .mr, .mr12 {
@@ -312,16 +293,15 @@ code {
     margin-left: 12px
 }
 
-.search-meta {
-    display: flex;
-    align-items: center
+.site-name {
+    display: flex
 }
 
 .mt5 {
     margin-top: 6px
 }
 
-.mt10, #commentform, img, .comments .more {
+.mt10, #commentform, .content img, .comments .more {
     margin-top: 12px
 }
 
@@ -412,16 +392,16 @@ code {
     margin-bottom: 12px
 }
 
-.inp, .btn, .table, .ias-trigger, code, img {
+.inp, .btn, .table, .ias-trigger, img {
     border-radius: 6px
+}
+
+code {
+    border-radius: 4px
 }
 
 .wp-caption img, .big img, .gallery img {
     border-radius: 0
-}
-
-.gallery img, .gallery-caption {
-    margin: 0 5px 10px
 }
 
 .entry-content blockquote ul li, .entry-content blockquote ol li {
@@ -496,17 +476,6 @@ blockquote p:last-child, pre p:last-child, p:last-child, .status-content p, .sta
     padding: 36px 0
 }
 
-code, pre, blockquote, h4, del, .ding {
-    color: #888;
-    color: var(--dark-color-bbb, #888);
-    font-family: 'roboto slab'
-}
-
-.fat-meta {
-    margin-top: 36px;
-    padding-bottom: 36px
-}
-
 .logo {
     width: 80px
 }
@@ -532,10 +501,6 @@ li, .comment, .lsn {
 
 .comment-content, .mt12 {
     margin-top: 12px
-}
-
-.avatar, .gallery-item img {
-    margin-top: 0
 }
 
 .mr-ico, .text_box {
@@ -623,25 +588,34 @@ li, .comment, .lsn {
     margin-left: 0
 }
 
+.avatar {
+    width: 48px;
+    height: 48px
+}
+
 .children .avatar {
     width: 38px;
     height: 38px;
     margin-right: 10px
 }
 
-.leave-reply {
+.ml-tiny, .leave-reply {
     margin-left: 6px
 }
 
-.little_star {
+.real-comment {
     height: 120px;
     line-height: 24px;
     margin: 6px 0 16px;
-    padding: 8px;
     resize: vertical
 }
 
-.little_star, .s-text, .inp {
+#toggle, .real-comment {
+    padding: 8px;
+    -webkit-tap-highlight-color: transparent
+}
+
+.real-comment, .s-text, .inp {
     box-sizing: border-box
 }
 
@@ -657,7 +631,7 @@ li, .comment, .lsn {
     border: 1px solid #ddd;
     border: var(--dark-solid, 1px solid #ddd);
     background: #fff;
-    background: var(--dark-background-e5, #fff);
+    background: var(--background-input-focus);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.12) inset
 }
 
@@ -686,8 +660,8 @@ h2, #reply-title, .fwt, .site-name {
 
 @font-face {
     font-family: 'frog';
-    src: url(/assets/fonts/frog.eot?cz9zp2);
-    src: url(/assets/fonts/frog.eot?cz9zp2#iefix) format("embedded-opentype"), url(/assets/fonts/frog.ttf?cz9zp2) format("truetype"), url(/assets/fonts/frog.woff?cz9zp2) format("woff"), url(/assets/fonts/frog.svg?cz9zp2#frog) format("svg")
+    src: url(/assets/fonts/frog.eot);
+    src: url(/assets/fonts/frog.eot#iefix) format("embedded-opentype"), url(/assets/fonts/frog.ttf) format("truetype"), url(/assets/fonts/frog.woff) format("woff"), url(/assets/fonts/frog.svg#frog) format("svg")
 }
 
 [class^="i-"], [class*=" i-"] {
@@ -767,12 +741,7 @@ h2, #reply-title, .fwt, .site-name {
     line-height: 1.5
 }
 
-.b-avatar {
-    margin-top: -10px
-}
-
 .btn {
-    padding: 0 12px;
     background: #998079;
     background: var(--dark-background-e0, var(--light-background-e0));
     box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.14) inset
@@ -788,17 +757,16 @@ sub, sup, #search, .btn, .wp-caption, .video-header, .sv-inner {
 
 .animation {
     border-radius: 100%;
-    background-color: #898989;
-    -webkit-animation: scaleout 1s infinite ease-in-out;
+    background: #898989;
     animation: scaleout 1s infinite ease-in-out;
     z-index: 50
 }
 
-.menu-item a {
+.menu-item a, .btn {
     padding: 0 12px
 }
 
-#menu-toggle, .btn, .cur, button, input[type="button"], input[type="reset"], input[type="submit"] {
+#toggle, .btn, .cur, button, input[type="button"], input[type="reset"], input[type="submit"] {
     cursor: pointer
 }
 
@@ -819,7 +787,7 @@ sub, sup, #search, .btn, .wp-caption, .video-header, .sv-inner {
     margin: 2px 0 0
 }
 
-rt {
+rt, .font-tiny {
     font-size: .75rem
 }
 
@@ -836,11 +804,11 @@ rt {
         height: 480px
     }
 
-    .btn, .more, .animation, .logo, .avatar, .text_box, .cmt-input, .s-text {
+    .btn, .more, .animation, .logo, .text_box, .cmt-input, .s-text {
         height: 40px
     }
 
-    .btn, .more, .animation, .logo, .avatar {
+    .btn, .more, .animation, .logo {
         line-height: 40px
     }
 
@@ -861,14 +829,13 @@ rt {
 
 @media screen and (min-width: 1024px) {
     #header, .site-title {
-        display: flex;
         height: 64px;
         line-height: 64px
     }
 
     #menu {
         display: block !important;
-        padding: 0 0 0 160px
+        padding: 0 0 0 148px
     }
 
     .headerin, .footerin {
@@ -911,7 +878,7 @@ rt {
         margin-right: auto
     }
 
-    .little_star {
+    .real-comment {
         width: 640px
     }
 
@@ -965,27 +932,23 @@ rt {
 }
 
 @media screen and (max-width: 1023px) {
-    .site-name, #menu-toggle {
-        display: block;
-        position: absolute;
-        top: 0;
-        padding: 0 10px
+    #site-logo {
+        width: 60px
     }
 
-    #menu-toggle {
-        width: 60px;
-        right: 0
+    #menu-toggle, #site-logo {
+        display: block
     }
 
-    .site-title {
+    .site-title, #site-logo {
         margin: 0 auto;
         text-align: center
     }
 
-    .site-title, .i-menu {
-        height: 56px;
-        line-height: 56px;
-        color: var(--dark-color-basic, var(--light-color-basic))
+    .site-title, #menu-toggle {
+        height: 60px;
+        line-height: 60px;
+        color: var(--dark-color-f5, var(--light-color-basic))
     }
 
     .menu-item a {
@@ -1000,6 +963,10 @@ rt {
 
     #menu {
         display: none
+    }
+
+    .menu-item:first-child {
+        border-top: 0 none
     }
 
     .i-search:before {
@@ -1041,7 +1008,8 @@ rt {
     }
 
     .avatar {
-        width: 40px
+        width: 40px;
+        height: 40px
     }
 
     .footer {
@@ -1056,11 +1024,7 @@ rt {
         float: none
     }
 
-    #search {
-        padding-bottom: 8px
-    }
-
-    .little_star, .f-name, .s-text, .cmt-input, .site-title {
+    .real-comment, .f-name, .s-text, .cmt-input, .site-title {
         width: 100%
     }
 
@@ -1073,12 +1037,19 @@ rt {
         padding: 24px
     }
 
-    .little_star {
+    .real-comment {
         height: 118px
     }
 }
 
 @media screen and (max-width: 719px) {
+    .site-name {
+        margin-left: 8px
+    }
+
+,#toggle {
+    margin: 0 4px
+}
     .inner, .egret, .archive-list {
         margin-left: 16px;
         margin-right: 16px
@@ -1102,15 +1073,11 @@ rt {
     }
 
     .bp {
-        padding: 24px 12px 0
+        padding: 24px 12px
     }
 
     .fat, .egret, .bp {
         border-radius: 4px
-    }
-
-    .fat-meta {
-        padding-bottom: 24px
     }
 
     .item-s-b {
