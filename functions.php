@@ -78,7 +78,7 @@ require_once(get_template_directory() . '/plugin/tool.php');
  * 提供获取配置的对外接口
  * $group string
  * $item string
- * @return json
+ * @return array
  *
  * 函数解析: 本请求最后会被组成函数调用 get_brave_config(basic, asset_uri);
  * 
