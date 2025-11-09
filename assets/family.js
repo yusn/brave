@@ -167,11 +167,12 @@ if (isaEl) {
         // 修复向下滚动到加载下一页,执行刷新触发自动加载,再向下滚动出现一次隐藏 header 的问题
         lastOffsetY = window.scrollY;
     });
-    ias.on('appended', function (e) {
-        loadPrism(e.items);
+
+    ias.on('appended', function (event) {
+        loadPrism(event.items);
     });
 	
-	ias.on('page', (event) => {
+	ias.on('page', function (event) {
 		// update the title
 		document.title = event.title;
 		// update the url
