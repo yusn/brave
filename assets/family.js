@@ -155,9 +155,7 @@ if (isaEl) {
 
     ias.on('last', function () {
         // 删除 container 元素下的含有 more 元素的节点, 并插入新节点(直接设置 className, 点击标签会报错)
-        for (var el; el = document.querySelector('.container .more');) {
-            el.remove();
-        }
+        document.querySelector('.container .more').remove();
         iasHtml = '<div class="ias-noneleft more">已到结尾</div>';
         isaEl.insertAdjacentHTML('beforeend', iasHtml);
     });
