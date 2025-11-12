@@ -88,31 +88,30 @@ window.addEventListener('scroll', function () {
 
 // 加载 prism.js 文件
 function loadPrism(itemArr) {
+    var prismJS = document.querySelector('#prism'); // 找 id = 'prism' 的 js
     for (var el of itemArr) {
         if (el.querySelector('pre code')) {
-            var prismJS = document.querySelector('#prism'); // 找 id = 'prism' 的 js
             if (prismJS) {
                 Prism.highlightAllUnder(el);
             } else {
                 var group = 'basic', item = 'asset_uri',
                     reqObj = {group, item, url: '/api/v1/get_config'};
                 callXHR(reqObj, prismCb);
-				
-                function prismCb(data) {
-                    var res = JSON.parse(data.response);
-					if (0 !== res['code']) {
-						return;
-					}
-					var srcUrl = res['data'][item] + '/prism',
-						prismCSS = document.createElement('link'), prismJS = document.createElement('script');
-                    Object.assign(prismJS, {src: srcUrl + '.js', id: 'prism'});
-                    Object.assign(prismCSS, {rel: 'stylesheet', href: srcUrl + '.css', media: 'all'});
-                    document.body.append(prismJS);
-                    document.head.append(prismCSS);
-                }
                 break; // 在当前加载的元素里找到第一个包含 pre code 的元素处理完即可跳出循环。
             }
         }
+    }
+    function prismCb(data) {
+        var res = JSON.parse(data.response);
+        if (0 !== res['code']) {
+            return;
+        }
+        var srcUrl = res['data'][item] + '/prism',
+            prismCSS = document.createElement('link'), prismJS = document.createElement('script');
+        Object.assign(prismJS, {src: srcUrl + '.js', id: 'prism'});
+        Object.assign(prismCSS, {rel: 'stylesheet', href: srcUrl + '.css', media: 'all'});
+        document.body.append(prismJS);
+        document.head.append(prismCSS);
     }
 }
 
