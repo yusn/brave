@@ -16,9 +16,6 @@
 // 保持入参 $key 为函数内部要取的变量名
 function get_brave_seo($key) {
 	global $post;
-	
-	$keywords = ''; $description = ''; $author = '';
-	
 	/**
 	 * 获取用户名称, query 外层需要借助 get_queried_object
 	 * @see https://developer.wordpress.org/reference/functions/get_queried_object/
