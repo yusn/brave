@@ -116,15 +116,14 @@ if ( is_singular() && pings_open() ) {
 			<?php endif; ?>
 		</div>
 		<ul id="menu" class="menu" role="navigation" itemscope itemtype="//schema.org/SiteNavigationElement">
-			<div class="searchbox">
+			<li class="searchbox">
 				<form id="search" action="<?php echo $home_url; ?>" method="get">
-					<span id="menu-search" class="i-search c3"></span>
-					<label title="Search" for="search">
-						<input class="inp s-text" type="text" name="s" placeholder="..." value="" />
-					</label>
+					<span class="i-search c3"></span>
+					<input id="menu-search" class="inp s-text" type="text" name="s" value="" />
+					<input type="submit" class="none" value="" />
 				</form>
-			</div>
-			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu', 'container' => '') ); ?>
+			</li>
+			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu') ); ?>
 		</ul>
 	</div>
 </header>
