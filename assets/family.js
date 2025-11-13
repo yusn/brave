@@ -23,10 +23,9 @@ function switchTo(el, displayValue) {
 }
 
 /* Menu toggle 27 Aug 2022 */
-var toggle = document.querySelector('#toggle');
 var menu = document.querySelector('#menu');
 
-toggle.addEventListener('click', function () {
+document.querySelector('#toggle').addEventListener('click', function (e) {
     menuToggle();
 });
 
@@ -76,8 +75,7 @@ function toggleHeader() {
 }
 
 // 修复 iOS Safari 环境下 focus 事件导致的菜单隐藏问题
-var menuSearch = document.querySelector('#menu-search');
-menuSearch.addEventListener('click', function () {
+document.querySelector('#menu-search').addEventListener('click', function () {
     isReady = !1;
 });
 
