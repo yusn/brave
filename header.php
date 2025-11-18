@@ -4,7 +4,7 @@
 <?php extract(pick_array(get_brave_config('basic'), ['asset_uri', 'site_name', 'home_url', 'logo'])); ?>
 <meta charset="<?php bloginfo( 'charset' ); ?>" />
 <link rel="profile" href="//gmpg.org/xfn/11" />
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes'/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, interactive-widget=resizes-content" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
