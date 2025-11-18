@@ -115,16 +115,15 @@ if ( is_singular() && pings_open() ) {
 				<a class="i-frog" id="site-logo" href="/" title="<?php echo $site_name; ?>"></a>
 			<?php endif; ?>
 		</div>
-		<ul id="menu" class="menu" role="navigation" itemscope itemtype="//schema.org/SiteNavigationElement">
-			<li class="searchbox">
+		<div id="menu" class="menu" role="navigation" itemscope itemtype="//schema.org/SiteNavigationElement">
+			<div class="searchbox">
 				<form id="search" action="<?php echo $home_url; ?>" method="get">
 					<span class="i-search c3"></span>
-					<input id="menu-search" class="inp s-text" type="text" name="s" value="" />
-					<input type="submit" class="none" value="" />
+					<input id="menu-search" class="inp s-text" type="text" name="s"/>
 				</form>
-			</li>
-			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu') ); ?>
-		</ul>
+			</div>
+			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu', 'container' => '') ); ?>
+		</div>
 	</div>
 </header>
 <div class="wrapper mt">
