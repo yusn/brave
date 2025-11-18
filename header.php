@@ -119,7 +119,7 @@ if ( is_singular() && pings_open() ) {
 			<div class="searchbox">
 				<form id="search" action="<?php echo $home_url; ?>" method="get">
 					<span class="i-search c3"></span>
-					<input id="menu-search" class="inp s-text" type="text" name="s"/>
+					<input id="menu-search" class="inp s-text" type="search" name="s"/>
 				</form>
 			</div>
 			<?php wp_nav_menu(array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu', 'container' => '') ); ?>

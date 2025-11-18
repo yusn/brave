@@ -320,7 +320,7 @@ if (!is_admin()) {
 // 自定义搜索框
 function get_brave_search_form($form) {
 	$form = '<form id="search" role="search" method="get" action="' . home_url('/') . '" >
-	<input class="b_r inp text_box" type="text" value="' . get_search_query() . '" name="s" /><input type="submit" class="b_r btn" value="' . esc_attr__('搜索', 'brave') . '" />
+	<input class="b_r inp text_box" type="search" value="' . get_search_query() . '" name="s" /><input type="submit" class="b_r btn" value="' . esc_attr__('搜索', 'brave') . '" />
 	</form>';
 	return $form;
 }
