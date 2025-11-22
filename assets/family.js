@@ -53,7 +53,7 @@ if (document.readyState === 'complete' || (document.readyState !== 'loading')) {
 }
 
 function setHeader(value) {
-    var setAnimation = 'top 200ms ', setValue;
+    var setAnimation = 'top 150ms ', setValue;
     if (value === 'show') {
         setValue = '0px';
         setAnimation += 'linear';
@@ -213,7 +213,7 @@ function like(el) {
 			_data = res['data'];
 			
         // delay remove animation
-        setTimeout(removeAnimation, 50);
+        setTimeout(removeAnimation);
 
         function removeAnimation() {
             if (0 === res['code']) {
